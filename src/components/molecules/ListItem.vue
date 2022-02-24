@@ -12,7 +12,7 @@
         </router-link>
       </v-list-item> -->
       <v-list-item class="px-10">
-        <router-link to="/dashboard" class="link">
+        <router-link to="/" class="link">
           <v-layout row align-center justify-center>
             <v-list-item-icon>
               <v-icon>{{ svgDashboard }}</v-icon>
@@ -48,20 +48,6 @@ export default {
     const state = reactive({
       svgDashboard: mdiViewDashboard,
       svgFolder: mdiFolder,
-      navigations: [
-        {
-          id: 1,
-          name: "Dashboard",
-          url: "/dashboard",
-          icon: "dashboard",
-        },
-        {
-          id: 2,
-          name: "Funding",
-          url: "/funding",
-          icon: "assignment",
-        },
-      ],
     });
     return { ...toRefs(state) };
   },

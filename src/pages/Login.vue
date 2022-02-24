@@ -40,18 +40,19 @@ import {
   reactive,
   toRefs,
 } from "@vue/composition-api";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/firebase";
 import { setToken } from "@/constans";
 import { required, minLength, maxLength, email } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
+import router from "@/router"
 
 export default {
   name: "LoginPage",
   components: {
     AuthLayout,
   },
-  setup(_, context) {
+  setup() {
     const state = reactive({
       email: "",
       password: "",
@@ -99,17 +100,15 @@ export default {
     });
 
     const v$ = useVuelidate(localRules, state);
-    const router = context.root.$router;
 
     const handleSubmit = async () => {
-      const auth = getAuth(app);
       if (!v$.value.$invalid) {
         try {
           await signInWithEmailAndPassword(auth, state.email, state.password)
             .then((userCredential) => {
               if (userCredential.user) {
                 setToken(userCredential.user.accessToken);
-                router.push('/dashboard')
+                router.push('/')
               }
             })
             .catch((err) => {

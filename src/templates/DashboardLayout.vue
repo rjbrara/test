@@ -12,7 +12,7 @@
         @click.stop="isDrawer = !isDrawer"
       ></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
-      <v-btn icon to="/">
+      <v-btn icon @click="handleLogout">
         <v-icon>{{ svgExit }}</v-icon>
       </v-btn>
     </v-app-bar>
@@ -49,6 +49,11 @@ import {
 } from "@vue/composition-api";
 import { mdiExitToApp } from "@mdi/js";
 import { ListItem } from "@/components";
+import { removeToken } from "@/constans";
+import { signOut } from "@firebase/auth";
+import { auth } from "@/firebase";
+import router from "@/router"
+
 export default {
   name: "DashboardLayout",
   props: {
@@ -64,6 +69,13 @@ export default {
     });
 
     const vuetify = getCurrentInstance().proxy.$vuetify;
+
+    const handleLogout = () => {
+      signOut(auth).then(() => {
+        removeToken("token");
+        router.push('/signin')
+      });
+    };
 
     watch(vuetify, () => {
       if (vuetify.breakpoint.mdAndDown) {
@@ -82,7 +94,7 @@ export default {
       }
     });
 
-    return { ...toRefs(state), vuetify };
+    return { ...toRefs(state), vuetify, handleLogout };
   },
 };
 </script>

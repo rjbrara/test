@@ -4,6 +4,7 @@ import Dashboard from '@/pages/Dashboard'
 import Login from '@/pages/Login'
 import Funding from '@/pages/Funding'
 import NotFound from '@/pages/404'
+import { getToken } from '@/constans'
 
 Vue.use(VueRouter)
 
@@ -12,19 +13,25 @@ const router = new VueRouter({
 //   base: import.meta.env.BASE_URL,
   routes: [
     {
-      path: '/',
+      path: '/signin',
       name: 'Login',
       component: Login
     },
     {
-      path: '/dashboard',
+      path: '/',
       name: 'Dashboard',
       component: Dashboard,
+      meta: {
+        isLoggedIn: true
+      }
     },
     {
       path: '/funding',
       name: 'Funding',
       component: Funding,
+      meta: {
+        isLoggedIn: true
+      }
     },
     {
       path: '/404',
@@ -36,6 +43,18 @@ const router = new VueRouter({
       redirect: '/404'
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  if(to.meta.isLoggedIn) {
+    if(getToken('token')) {
+      next()
+    } else {
+      next({ path: '/signin' })
+    }
+  } else {
+    next()
+  }
 })
 
 export default router
