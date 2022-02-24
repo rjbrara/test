@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@vue/composition-api": "^1.4.6",
-    "axios": "^0.26.0",
+    "@vuelidate/core": "^2.0.0-alpha.34",
+    "@vuelidate/validators": "^2.0.0-alpha.26",
     "core-js": "^3.8.3",
     "firebase": "^9.6.7",
     "vue": "^2.6.14",

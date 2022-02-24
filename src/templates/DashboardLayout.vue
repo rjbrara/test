@@ -1,21 +1,32 @@
 <template>
-  <v-main>
+  <div>
     <v-app-bar
       absolute
       color="grey lighten-3"
       elevate-on-scroll
       scroll-target="#scrolling-techniques-7"
     >
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
+      <!-- if width < 960 -->
+      <v-app-bar-nav-icon
+        v-if="isDrawer"
+        @click.stop="isDrawer = !isDrawer"
+      ></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
-      <v-icon>{{ svgAccount }}</v-icon>
+      <v-btn icon to="/">
+        <v-icon>{{ svgExit }}</v-icon>
+      </v-btn>
     </v-app-bar>
-    <v-navigation-drawer absolute bottom dark>
+    <!-- if width < 960 -->
+    <v-navigation-drawer v-if="isDrawer" absolute dark temporary>
+      <ListItem />
+    </v-navigation-drawer>
+    <!-- if width > 960 -->
+    <v-navigation-drawer v-else absolute dark permanent>
       <ListItem />
     </v-navigation-drawer>
     <v-sheet
       id="scrolling-techniques-6"
-      class="overflow-y-auto pa-12 px-1 grey lighten-3"
+      class="pa-12 px-1 grey lighten-3"
       height="100vh"
     >
       <v-container class="mr-6">
@@ -25,12 +36,18 @@
         <slot name="child"></slot>
       </v-container>
     </v-sheet>
-  </v-main>
+  </div>
 </template>
 
 <script>
-import { ref } from "@vue/composition-api";
-import { mdiAccount } from "@mdi/js";
+import {
+  getCurrentInstance,
+  watch,
+  reactive,
+  onMounted,
+  toRefs,
+} from "@vue/composition-api";
+import { mdiExitToApp } from "@mdi/js";
 import { ListItem } from "@/components";
 export default {
   name: "DashboardLayout",
@@ -41,8 +58,31 @@ export default {
     ListItem,
   },
   setup() {
-    const svgAccount = ref(mdiAccount);
-    return { svgAccount };
+    const state = reactive({
+      svgExit: mdiExitToApp,
+      isDrawer: null,
+    });
+
+    const vuetify = getCurrentInstance().proxy.$vuetify;
+
+    watch(vuetify, () => {
+      if (vuetify.breakpoint.mdAndDown) {
+        state.isDrawer = true;
+      } else {
+        state.isDrawer = false;
+      }
+    });
+
+    // if user reload page
+    onMounted(() => {
+      if (vuetify.breakpoint.mdAndDown) {
+        state.isDrawer = true;
+      } else {
+        state.isDrawer = false;
+      }
+    });
+
+    return { ...toRefs(state), vuetify };
   },
 };
 </script>
