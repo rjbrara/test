@@ -2,8 +2,8 @@
   <DashboardLayout title="Dashboard">
     <template v-slot:child>
       <div class="wrap-card">
-        <Card name="Total Funding" :total="totalFunding" />
-        <Card name="Total Users" :total="totalUsers" />
+        <Card name="Total Funding" :total="totalFunding" :icon="iconFunding" />
+        <Card name="Total Users" :total="totalUsers" :icon="iconUsers" />
       </div>
     </template>
   </DashboardLayout>
@@ -15,6 +15,7 @@ import { Card } from "@/components";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import { onMounted, reactive, toRefs } from "vue-demi";
+import { mdiChartBar, mdiAccountMultiple } from "@mdi/js";
 
 export default {
   name: "DashboardPage",
@@ -26,6 +27,8 @@ export default {
     const state = reactive({
       totalFunding: 0,
       totalUsers: 0,
+      iconFunding: mdiChartBar,
+      iconUsers: mdiAccountMultiple
     });
     const getTotalFunding = async () => {
       const querySnapshot = await getDocs(collection(db, "funding"));

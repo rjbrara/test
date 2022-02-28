@@ -8,12 +8,13 @@
     >
       <!-- if width < 960 -->
       <v-app-bar-nav-icon
+        color="black"
         v-if="isDrawer"
         @click.stop="isDrawer = !isDrawer"
       ></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
       <v-btn icon @click="handleLogout">
-        <v-icon>{{ svgExit }}</v-icon>
+        <v-icon color="black">{{ svgExit }}</v-icon>
       </v-btn>
     </v-app-bar>
     <!-- if width < 960 -->
@@ -52,7 +53,7 @@ import { ListItem } from "@/components";
 import { removeToken } from "@/constans";
 import { signOut } from "@firebase/auth";
 import { auth } from "@/firebase";
-import router from "@/router"
+import router from "@/router";
 
 export default {
   name: "DashboardLayout",
@@ -73,7 +74,7 @@ export default {
     const handleLogout = () => {
       signOut(auth).then(() => {
         removeToken("token");
-        router.push('/signin')
+        router.push("/signin");
       });
     };
 

@@ -8,7 +8,11 @@
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-row align-items="center">
+        <v-row
+          align-items="center"
+          justify-sm="space-around"
+          justify-lg="start"
+        >
           <v-col cols="2">
             <v-card
               class="mt-n10 d-flex align-center justify-center"
@@ -157,7 +161,7 @@
 </template>
 
 <script>
-import { mdiChartBar } from "@mdi/js";
+import { mdiListStatus } from "@mdi/js";
 import { computed, onMounted, reactive, toRefs } from "@vue/composition-api";
 import {
   collection,
@@ -167,17 +171,21 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  Timestamp,
+  where,
+  query
 } from "firebase/firestore";
 import { db, storage } from "@/firebase";
-import { getDownloadURL, ref, uploadBytesResumable } from "@firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { required, minLength, maxLength, numeric } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
+import formatRupiah from "@/utils/currency";
 
 export default {
   name: "TableComponent",
   setup() {
     const state = reactive({
-      svgChart: mdiChartBar,
+      svgChart: mdiListStatus,
       imagePreviews: null,
       search: "",
       isOpenDialogCreateUpdate: {
@@ -303,7 +311,6 @@ export default {
           });
         });
       }
-      console.table([state.formData, state.imagePreviews]);
     };
 
     const openDialogDelete = (id) => {
@@ -320,7 +327,7 @@ export default {
       state.isOpenDialogDelete = false;
     };
 
-    const setImagePreviews = (file) => {
+    const setImagePreviews = async (file) => {
       if (!file) return;
       const setFile = file[0];
       const fimage = file ? URL.createObjectURL(setFile) : undefined;
@@ -328,45 +335,13 @@ export default {
       state.imagePreviews = fimage;
       // store to firebase storage
       const storageRef = ref(storage, setFile.name);
-      // create file metadata including the content type
-      // const metadata = {
-      //   contentType: setFile.type,
-      // };
       // upload the file and metadata
-      const uploadTask = uploadBytesResumable(
+      await uploadBytes(
         storageRef,
-        setFile.name
-        // metadata
+        setFile
       );
-      // store to local state file url
-      // reference: https://firebase.google.com/docs/storage/web/upload-files?hl=id#upload_from_a_blob_or_file
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          // bbserve state change events such as progress, pause, and resumed
-          switch (snapshot.state) {
-            case "paused":
-              console.log("Upload is paused");
-              break;
-            case "running":
-              console.log("Upload is running");
-              break;
-          }
-        },
-        (error) => {
-          console.log(error);
-        },
-        () => {
-          // handle successful uploads on complete
-          // for instance, get the download URL: https://firebasestorage.googleapis.com/...
-          getDownloadURL(uploadTask?.snapshot?.ref)
-            .then((downloadUrl) => {
-              state.formData.image = downloadUrl;
-              console.log(uploadTask?.snapshot?.ref);
-            })
-            .catch((err) => console.log(err));
-        }
-      );
+      const url = await getDownloadURL(storageRef);
+      state.formData.image = url;
     };
 
     const handleSubmit = async () => {
@@ -387,7 +362,10 @@ export default {
             target_funding: target_funding,
             currently_collected: currently_collected,
             description: description,
-          });
+            createdAt: Timestamp.now(),
+            modifiedAt: Timestamp.now(),
+          })
+          state.isOpenDialogCreateUpdate.open = false;
         } catch (error) {
           console.log(error);
         }
@@ -413,6 +391,7 @@ export default {
             target_funding: target_funding,
             currently_collected: currently_collected,
             description: description,
+            modifiedAt: Timestamp.now()
           });
           state.isOpenDialogCreateUpdate.open = false;
         } catch (error) {
@@ -432,11 +411,18 @@ export default {
     };
 
     const getDataFromFirestore = async () => {
-      const querySnapshot = await getDocs(collection(db, "funding"));
+      const q = query(collection(db, "funding"), where("createdAt", "<=", new Date()))
+      const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) =>
-        state.data.push({ ...doc.data(), id: doc.id })
+        state.data.push({
+          ...doc.data(),
+          id: doc.id,
+          currently_collected: formatRupiah(doc.data().currently_collected),
+          target_funding: formatRupiah(doc.data().target_funding),
+        })
       );
     };
+
     onMounted(() => {
       getDataFromFirestore();
     });

@@ -10,18 +10,18 @@
       <v-row align="center" justify="space-between" class="mx-0">
         <v-col cols="6">
           <v-card
-            class="mt-n16 d-flex align-center justify-center"
+            class="mt-n16 d-flex align-center justify-center mb-5"
             rounded="lg"
             min-height="100px"
-            min-width="120px"
+            min-width="100px"
             color="red accent-3"
           >
-            <v-icon color="white" x-large>{{ svgChart }}</v-icon>
+            <v-icon color="white" x-large>{{ icon }}</v-icon>
           </v-card>
         </v-col>
         <v-col cols="4">
-          <p class="font-weight-regular body-2">{{ name }}</p>
-          <p>{{ total }}</p>
+          <p class="font-weight-regular text-subtitle-1">{{ name }}</p>
+          <p class="text-subtitle-1 font-weight-bold">{{ formatRupiah(total) }}</p>
         </v-col>
       </v-row>
     </v-card-text>
@@ -29,9 +29,7 @@
 </template>
 
 <script>
-import { mdiChartBar } from "@mdi/js";
-import { ref } from "@vue/composition-api";
-
+import formatRupiah from "@/utils/currency"
 export default {
   name: "CardComponent",
   props: {
@@ -43,11 +41,14 @@ export default {
       type: Number,
       required: true,
     },
+    icon: {
+      type: String,
+      required: true
+    }
   },
   setup() {
-    const svgChart = ref(mdiChartBar);
-    return { svgChart };
-  },
+    return { formatRupiah }
+  }
 };
 </script>
 
