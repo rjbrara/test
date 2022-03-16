@@ -4,6 +4,7 @@ import Dashboard from '@/pages/Dashboard'
 import Login from '@/pages/Login'
 import Funding from '@/pages/Funding'
 import NotFound from '@/pages/404'
+import HistoryDonasi from '@/pages/HistoryDonasi'
 import { getToken } from '@/constans'
 
 Vue.use(VueRouter)
@@ -29,6 +30,14 @@ const router = new VueRouter({
       path: '/funding',
       name: 'Funding',
       component: Funding,
+      meta: {
+        isLoggedIn: true
+      }
+    },
+    {
+      path: '/history-donasi',
+      name: 'historyDonasi',
+      component: HistoryDonasi,
       meta: {
         isLoggedIn: true
       }

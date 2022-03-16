@@ -324,7 +324,7 @@ export default {
     };
 
     const closeDialogDelete = () => {
-      state.isOpenDialogDelete = false;
+      state.isOpenDialogDelete.open = false;
     };
 
     const setImagePreviews = async (file) => {
@@ -417,8 +417,8 @@ export default {
         state.data.push({
           ...doc.data(),
           id: doc.id,
-          currently_collected: formatRupiah(doc.data().currently_collected),
-          target_funding: formatRupiah(doc.data().target_funding),
+          currently_collected: `Rp. ${formatRupiah(doc.data().currently_collected)}`,
+          target_funding: `Rp. ${formatRupiah(doc.data().target_funding)}`,
         })
       );
     };

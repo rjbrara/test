@@ -35,19 +35,32 @@
           </v-layout>
         </router-link>
       </v-list-item>
+       <v-list-item class="px-10">
+        <router-link to="/history-donasi" class="link">
+          <v-layout row align-center justify-center>
+            <v-list-item-icon>
+              <v-icon>{{ svgHistory }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <h4>History Donasi</h4>
+            </v-list-item-content>
+          </v-layout>
+        </router-link>
+      </v-list-item>
     </v-list-item-group>
   </v-list>
 </template>
 
 <script>
 import { reactive, toRefs } from "@vue/composition-api";
-import { mdiViewDashboard, mdiFolder } from "@mdi/js";
+import { mdiViewDashboard, mdiFolder, mdiArchive } from "@mdi/js";
 export default {
   name: "ListItem",
   setup() {
     const state = reactive({
       svgDashboard: mdiViewDashboard,
       svgFolder: mdiFolder,
+      svgHistory: mdiArchive
     });
     return { ...toRefs(state) };
   },

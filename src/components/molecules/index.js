@@ -1,3 +1,5 @@
 import ListItem from "./ListItem"
 import Table from "./Table"
-export { ListItem, Table }
+import TableDonasi from "./TableDonasi"
+
+export { ListItem, Table, TableDonasi }
