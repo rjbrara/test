@@ -207,6 +207,7 @@ export default {
           });
         });
       }
+      console.log(state.formData.status)
     };
 
     const openDialogDelete = (id) => {
@@ -262,7 +263,6 @@ export default {
           donasi: `Rp. ${formatRupiah(doc.data().donasi)}`,
           status: convertStatusText(doc.data().status),
         });
-        console.log(doc.id);
       });
     };
 

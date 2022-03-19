@@ -13,6 +13,9 @@
         @click.stop="isDrawer = !isDrawer"
       ></v-app-bar-nav-icon>
       <v-spacer></v-spacer>
+      <v-btn icon @click="openDialog">
+        <v-icon color="black">{{ svgSetting }}</v-icon>
+      </v-btn>
       <v-btn icon @click="handleLogout">
         <v-icon color="black">{{ svgExit }}</v-icon>
       </v-btn>
@@ -35,6 +38,69 @@
           <span class="display-1">{{ title }}</span>
         </div>
         <slot name="child"></slot>
+        <v-dialog v-model="isOpenDialog" width="700">
+          <v-card>
+            <v-card-title class="text-h5 grey lighten-2">
+              Lembaga
+            </v-card-title>
+
+            <v-container>
+              <v-row no-gutters>
+                <v-col cols="12" sm="12" md="12" class="mb-5">
+                  <v-img
+                    :src="imagePreviews"
+                    contain
+                    alt="image preview"
+                    v-if="imagePreviews"
+                  ></v-img>
+                </v-col>
+                <v-col cols="12" sm="12" md="12">
+                  <v-file-input
+                    small-chips
+                    multiple
+                    outlined
+                    prepend-icon=""
+                    accept="image/png, image/jpeg, image/bmp"
+                    label="Input image"
+                    @change="setImagePreviews"
+                  ></v-file-input>
+                </v-col>
+                <v-col cols="12" sm="12" md="12">
+                  <v-text-field
+                    v-model="formData.noRek"
+                    outlined
+                    label="No Rekening"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="12" md="12">
+                  <v-select
+                    v-model="formData.payment"
+                    :items="items"
+                    label="Select Item"
+                    multiple
+                    chips
+                    outlined
+                    :menu-props="{
+                      closeOnContentClick: isSelectClose,
+                    }"
+                  >
+                    <template v-slot:prepend-item>
+                      <v-list-item-action class="iconClose">
+                        <v-icon @click="onClose">{{ svgClose }}</v-icon>
+                      </v-list-item-action>
+                      <v-divider></v-divider>
+                    </template>
+                  </v-select>
+                </v-col>
+              </v-row>
+            </v-container>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="primary" text @click="handleUpdate"> Edit </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-container>
     </v-sheet>
   </div>
@@ -48,12 +114,15 @@ import {
   onMounted,
   toRefs,
 } from "@vue/composition-api";
-import { mdiExitToApp } from "@mdi/js";
+import { mdiExitToApp, mdiWrench, mdiClose } from "@mdi/js";
 import { ListItem } from "@/components";
 import { removeToken } from "@/constans";
 import { signOut } from "@firebase/auth";
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
 import router from "@/router";
+import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
+import { storage } from "@/firebase";
+import { doc, getDoc, updateDoc, Timestamp } from "@firebase/firestore";
 
 export default {
   name: "DashboardLayout",
@@ -66,7 +135,27 @@ export default {
   setup() {
     const state = reactive({
       svgExit: mdiExitToApp,
+      svgSetting: mdiWrench,
+      svgClose: mdiClose,
       isDrawer: null,
+      isOpenDialog: false,
+      isSelectClose: false,
+      imagePreviews: null,
+      defaultUID: "3ngAnqg3AwKi7DTM3yeD",
+      formData: {
+        logo: null,
+        noRek: null,
+        payment: [],
+      },
+      items: [
+        "QRIS (OVO, GOPAY, LINK AJA)",
+        "Transfer Bank Syariah Indonesia",
+        "Transfer Bank DKI Syariah",
+        "Transfer Bank BCA",
+        "Transfer Bank Mandiri",
+        "Transfer Bank Danamon",
+        "Transfer Bank Permata Bank",
+      ],
     });
 
     const vuetify = getCurrentInstance().proxy.$vuetify;
@@ -77,6 +166,61 @@ export default {
         router.push("/signin");
       });
     };
+
+    const setImagePreviews = async (file) => {
+      if (!file) return;
+      const setFile = file[0];
+      const fimage = file ? URL.createObjectURL(setFile) : undefined;
+      // store to local state imagePrerviews
+      state.imagePreviews = fimage;
+      // store to firebase storage
+      const storageRef = ref(storage, setFile.name);
+      // upload the file and metadata
+      await uploadBytes(storageRef, setFile);
+      const url = await getDownloadURL(storageRef);
+      state.formData.logo = url;
+    };
+
+    // open dialog
+    const openDialog = async () => {
+      state.isOpenDialog = true;
+      const ref = await doc(db, "lembaga", state.defaultUID);
+      const docSnap = await getDoc(ref);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        Object.keys(data).forEach((key) => {
+          const formData = state.formData;
+          Object.keys(formData).forEach((key2) => {
+            if (key === key2) {
+              formData[key2] = data[key];
+            } else if (key === "logo") {
+              state.imagePreviews = data[key];
+            }
+          });
+        });
+      }
+      console.log(state.formData);
+    };
+
+    const handleUpdate = async () => {
+      try {
+        const { noRek, logo, payment } = state.formData;
+        const ref = doc(db, "lembaga", state.defaultUID);
+        await updateDoc(ref, {
+          logo: logo,
+          noRek: noRek,
+          modifiedAt: Timestamp.now(),
+          payment: payment,
+        });
+        state.isOpenDialog = false;
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const onClose = () => {
+      state.isSelectClose = true
+    }
 
     watch(vuetify, () => {
       if (vuetify.breakpoint.mdAndDown) {
@@ -95,9 +239,24 @@ export default {
       }
     });
 
-    return { ...toRefs(state), vuetify, handleLogout };
+    return {
+      ...toRefs(state),
+      vuetify,
+      handleLogout,
+      openDialog,
+      setImagePreviews,
+      handleUpdate,
+      onClose
+    };
   },
 };
 </script>
 
-<style scope></style>
+<style scope>
+.iconClose {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1em 0 1em;
+}
+</style>
