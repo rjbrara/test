@@ -1,7 +1,7 @@
 <template>
   <DashboardLayout title="Dashboard">
     <template v-slot:child>
-      <div class="wrap-card">
+      <div class="wrap-card" style="{background: 'red'}">
         <Card name="Total Funding" :total="totalFunding" :icon="iconFunding" />
         <Card name="Total Users" :total="totalUsers" :icon="iconUsers" />
       </div>

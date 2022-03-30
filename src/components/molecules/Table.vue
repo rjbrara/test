@@ -236,7 +236,7 @@ export default {
         title: {
           required,
           minLength: minLength(5),
-          maxLength: maxLength(30),
+          maxLength: maxLength(50),
         },
         target_funding: {
           required,

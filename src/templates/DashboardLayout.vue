@@ -28,16 +28,14 @@
     <v-navigation-drawer v-else absolute dark permanent>
       <ListItem />
     </v-navigation-drawer>
-    <v-sheet
-      id="scrolling-techniques-6"
-      class="pa-12 px-1 grey lighten-3"
-      height="100vh"
-    >
-      <v-container class="mr-6">
-        <div class="mb-10">
-          <span class="display-1">{{ title }}</span>
+    <v-sheet id="scrolling-techniques-6" class="pa-12 grey lighten-3 px-1" height="100vh">
+      <v-container class="mr-4 pa-8">
+        <div class="content">
+          <div class="mb-10">
+            <span class="display-1">{{ title }}</span>
+          </div>
+          <slot name="child"></slot>
         </div>
-        <slot name="child"></slot>
         <v-dialog v-model="isOpenDialog" width="700">
           <v-card>
             <v-card-title class="text-h5 grey lighten-2">
@@ -219,8 +217,8 @@ export default {
     };
 
     const onClose = () => {
-      state.isSelectClose = true
-    }
+      state.isSelectClose = true;
+    };
 
     watch(vuetify, () => {
       if (vuetify.breakpoint.mdAndDown) {
@@ -246,17 +244,22 @@ export default {
       openDialog,
       setImagePreviews,
       handleUpdate,
-      onClose
+      onClose,
     };
   },
 };
 </script>
 
-<style scope>
+<style scoped>
 .iconClose {
   width: 100%;
   display: flex;
   justify-content: flex-end;
   padding: 0 1em 0 1em;
+}
+.content {
+  flex-grow: 1;
+  height: 100vh;
+  padding: 0 8em !important;
 }
 </style>
