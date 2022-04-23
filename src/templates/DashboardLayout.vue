@@ -28,7 +28,11 @@
     <v-navigation-drawer v-else absolute dark permanent>
       <ListItem />
     </v-navigation-drawer>
-    <v-sheet id="scrolling-techniques-6" class="pa-12 grey lighten-3 px-1" height="100vh">
+    <v-sheet
+      id="scrolling-techniques-6"
+      class="pa-12 grey lighten-3 px-1"
+      height="100vh"
+    >
       <v-container class="mr-4 pa-8">
         <div class="content">
           <div class="mb-10">
@@ -44,19 +48,21 @@
 
             <v-container>
               <v-row no-gutters>
-                <v-col cols="12" sm="12" md="12" class="mb-5">
+                <v-col class="mb-5 img" cols="12" sm="12" md="12">
                   <v-img
                     :src="imagePreviews"
-                    contain
+                    max-height="161"
+                    max-width="280"
                     alt="image preview"
+                    class="img"
                     v-if="imagePreviews"
                   ></v-img>
                 </v-col>
                 <v-col cols="12" sm="12" md="12">
                   <v-file-input
                     small-chips
-                    multiple
                     outlined
+                    multiple
                     prepend-icon=""
                     accept="image/png, image/jpeg, image/bmp"
                     label="Input image"
@@ -89,6 +95,26 @@
                       <v-divider></v-divider>
                     </template>
                   </v-select>
+                </v-col>
+                <v-col class="mb-5 img" cols="12" sm="12" md="12">
+                  <v-img
+                    :src="qrcodePreviews"
+                    max-height="161"
+                    max-width="280"
+                    alt="qrcode preview"
+                    v-if="qrcodePreviews"
+                  ></v-img>
+                </v-col>
+                <v-col cols="12" sm="12" md="12">
+                  <v-file-input
+                    small-chips
+                    multiple
+                    outlined
+                    prepend-icon=""
+                    accept="image/png, image/jpeg, image/bmp"
+                    label="Input image"
+                    @change="setQrcode"
+                  ></v-file-input>
                 </v-col>
               </v-row>
             </v-container>
@@ -139,11 +165,13 @@ export default {
       isOpenDialog: false,
       isSelectClose: false,
       imagePreviews: null,
+      qrcodePreviews: null,
       defaultUID: "3ngAnqg3AwKi7DTM3yeD",
       formData: {
         logo: null,
         noRek: null,
         payment: [],
+        qrcode: null,
       },
       items: [
         "QRIS (OVO, GOPAY, LINK AJA)",
@@ -179,6 +207,20 @@ export default {
       state.formData.logo = url;
     };
 
+    const setQrcode = async (file) => {
+      if (!file) return;
+      const setFile = file[0];
+      const fimage = file ? URL.createObjectURL(setFile) : undefined;
+      // store to local state imagePrerviews
+      state.qrcodePreviews = fimage;
+      // store to firebase storage
+      const storageRef = ref(storage, setFile.name);
+      // upload the file and metadata
+      await uploadBytes(storageRef, setFile);
+      const url = await getDownloadURL(storageRef);
+      state.formData.qrcode = url;
+    };
+
     // open dialog
     const openDialog = async () => {
       state.isOpenDialog = true;
@@ -193,22 +235,24 @@ export default {
               formData[key2] = data[key];
             } else if (key === "logo") {
               state.imagePreviews = data[key];
+            } else if (key === "qrcode") {
+              state.qrcodePreviews = data[key];
             }
           });
         });
       }
-      console.log(state.formData);
     };
 
     const handleUpdate = async () => {
       try {
-        const { noRek, logo, payment } = state.formData;
+        const { noRek, logo, payment, qrcode } = state.formData;
         const ref = doc(db, "lembaga", state.defaultUID);
         await updateDoc(ref, {
           logo: logo,
           noRek: noRek,
           modifiedAt: Timestamp.now(),
           payment: payment,
+          qrcode: qrcode,
         });
         state.isOpenDialog = false;
       } catch (error) {
@@ -243,6 +287,7 @@ export default {
       handleLogout,
       openDialog,
       setImagePreviews,
+      setQrcode,
       handleUpdate,
       onClose,
     };
@@ -261,5 +306,10 @@ export default {
   flex-grow: 1;
   height: 100vh;
   padding: 0 8em !important;
+}
+.img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
