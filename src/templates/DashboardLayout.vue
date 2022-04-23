@@ -34,12 +34,24 @@
       height="100vh"
     >
       <v-container class="mr-4 pa-8">
-        <div class="content">
-          <div class="mb-10">
+        <!-- if width < 960 -->
+        <v-row no-gutters v-if="isDrawer">
+          <v-col class="mb-10" cols="12" sm="12" md="12">
             <span class="display-1">{{ title }}</span>
-          </div>
-          <slot name="child"></slot>
-        </div>
+          </v-col>
+          <v-col cols="12" sm="12" md="12" lg="12">
+            <slot name="child"></slot>
+          </v-col>
+        </v-row>
+        <!-- if width > 960 -->
+        <v-row no-gutters v-else class="content">
+          <v-col class="mb-10" cols="12" sm="12" md="12">
+            <span class="display-1">{{ title }}</span>
+          </v-col>
+          <v-col cols="12" sm="12" md="12" lg="12">
+            <slot name="child"></slot>
+          </v-col>
+        </v-row>
         <v-dialog v-model="isOpenDialog" width="700">
           <v-card>
             <v-card-title class="text-h5 grey lighten-2">
@@ -303,8 +315,8 @@ export default {
   padding: 0 1em 0 1em;
 }
 .content {
-  flex-grow: 1;
-  height: 100vh;
+  /* flex-grow: 1;
+  height: 100vh; */
   padding: 0 8em !important;
 }
 .img {

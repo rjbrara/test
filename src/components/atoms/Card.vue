@@ -8,7 +8,7 @@
   >
     <v-card-text>
       <v-row align="center" justify="space-between" class="mx-0">
-        <v-col cols="6">
+        <v-col cols="4">
           <v-card
             class="mt-n16 d-flex align-center justify-center mb-5"
             rounded="lg"
@@ -19,7 +19,7 @@
             <v-icon color="white" x-large>{{ icon }}</v-icon>
           </v-card>
         </v-col>
-        <v-col cols="4">
+        <v-col cols="6">
           <p class="font-weight-regular text-subtitle-1">{{ name }}</p>
           <p class="text-subtitle-1 font-weight-bold">{{ formatRupiah(total) }}</p>
         </v-col>

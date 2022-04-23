@@ -2,7 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="data"
-    class="elevation-1 mt-15"
+    class="elevation-1 mt-10"
     :items-per-page="5"
     :search="search"
   >
@@ -13,18 +13,18 @@
           justify-sm="space-around"
           justify-lg="start"
         >
-          <v-col cols="2">
+          <v-col cols="2" v-if="!isDrawer">
             <v-card
               class="mt-n10 d-flex align-center justify-center"
               rounded="lg"
               min-height="90px"
-              min-width="100px"
+              min-width="90px"
               color="red accent-3"
             >
               <v-icon color="white" size="35px">{{ svgChart }}</v-icon>
             </v-card>
           </v-col>
-          <v-col cols="8" class="mt-5">
+          <v-col cols="12" sm="12" md="12" lg="8" class="mt-5">
             <v-text-field
               v-model="search"
               label="Search..."
@@ -109,7 +109,13 @@
 
 <script>
 import { mdiListStatus } from "@mdi/js";
-import { onMounted, reactive, toRefs } from "@vue/composition-api";
+import {
+  getCurrentInstance,
+  onMounted,
+  reactive,
+  toRefs,
+  watch,
+} from "@vue/composition-api";
 import {
   collection,
   getDocs,
@@ -132,6 +138,7 @@ export default {
       svgChart: mdiListStatus,
       imagePreviews: null,
       search: "",
+      isDrawer: null,
       isOpenDialogCreateUpdate: {
         id: null,
         open: false,
@@ -142,6 +149,11 @@ export default {
       },
       formData: {
         status: null,
+      },
+      fundingData: {
+        fundingId: null,
+        collected: null,
+        donasi: null,
       },
       headers: [
         {
@@ -187,6 +199,8 @@ export default {
       ],
     });
 
+    const vuetify = getCurrentInstance().proxy.$vuetify;
+
     // open dialog
     const openDialogCreateEdit = async (id) => {
       state.isOpenDialogCreateUpdate.open = true;
@@ -203,11 +217,15 @@ export default {
                 name: data[key] !== 0 ? "Success" : "Pending",
                 value: data[key],
               };
+            } else if (key === "fundingId") {
+              state.fundingData.fundingId = data[key];
+            } else if (key === "donasi") {
+              state.fundingData.donasi = parseInt(data[key]);
             }
           });
         });
       }
-      console.log(state.formData.status)
+      getDataFunding();
     };
 
     const openDialogDelete = (id) => {
@@ -226,14 +244,23 @@ export default {
 
     const handleUpdate = async () => {
       try {
-        // update data
+        const { fundingId, collected, donasi } = state.fundingData;
         const { status } = state.formData;
-
+        // update data funding
+        if (status === 1) {
+          
+          const refFunding = doc(db, "funding", fundingId);
+          await updateDoc(refFunding, {
+            currently_collected: collected + donasi,
+          });
+        }
+        // update data all donasi
         const ref = doc(db, "allDonasi", state.isOpenDialogCreateUpdate.id);
         await updateDoc(ref, {
           status: status,
           modifiedAt: Timestamp.now(),
         });
+
         state.isOpenDialogCreateUpdate.open = false;
       } catch (error) {
         console.log(error);
@@ -266,8 +293,31 @@ export default {
       });
     };
 
+    const getDataFunding = async () => {
+      const ref = doc(db, "funding", state.fundingData.fundingId);
+      const docSnap = await getDoc(ref);
+      if (docSnap.exists()) {
+        const { currently_collected } = docSnap.data();
+        state.fundingData.collected = currently_collected; //store data currently_collected
+      }
+    };
+
+    watch(vuetify, () => {
+      if (vuetify.breakpoint.mdAndDown) {
+        state.isDrawer = true;
+      } else {
+        state.isDrawer = false;
+      }
+      console.log(state.formData)
+    });
+
     onMounted(() => {
       getDataFromFirestore();
+      if (vuetify.breakpoint.mdAndDown) {
+        state.isDrawer = true;
+      } else {
+        state.isDrawer = false;
+      }
     });
 
     return {

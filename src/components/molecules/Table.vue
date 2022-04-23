@@ -2,7 +2,7 @@
   <v-data-table
     :headers="headers"
     :items="data"
-    class="elevation-1 mt-15"
+    class="elevation-1 mt-10"
     :items-per-page="5"
     :search="search"
   >
@@ -13,18 +13,18 @@
           justify-sm="space-around"
           justify-lg="start"
         >
-          <v-col cols="2">
+          <v-col v-if="!isDrawer" cols="2">
             <v-card
               class="mt-n10 d-flex align-center justify-center"
               rounded="lg"
               min-height="90px"
-              min-width="100px"
+              min-width="90px"
               color="red accent-3"
             >
               <v-icon color="white" size="35px">{{ svgChart }}</v-icon>
             </v-card>
           </v-col>
-          <v-col cols="8" class="mt-5">
+          <v-col cols="12" xs="12" sm="12" md="12" lg="8" class="mt-5">
             <v-text-field
               v-model="search"
               label="Search..."
@@ -35,8 +35,11 @@
         <v-spacer></v-spacer>
         <v-dialog v-model="isOpenDialogCreateUpdate.open" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              Create New Funding
+            <v-btn v-if="vuetify.breakpoint.xs" color="primary" x-small max-width="100" dark class="mb-2" v-bind="attrs" v-on="on">
+              Create Funding
+            </v-btn>
+            <v-btn v-else color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
+              Create Funding
             </v-btn>
           </template>
           <v-card>
@@ -162,7 +165,14 @@
 
 <script>
 import { mdiListStatus } from "@mdi/js";
-import { computed, onMounted, reactive, toRefs } from "@vue/composition-api";
+import {
+  getCurrentInstance,
+  computed,
+  onMounted,
+  reactive,
+  toRefs,
+  watch
+} from "@vue/composition-api";
 import {
   collection,
   getDocs,
@@ -173,7 +183,7 @@ import {
   deleteDoc,
   Timestamp,
   where,
-  query
+  query,
 } from "firebase/firestore";
 import { db, storage } from "@/firebase";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
@@ -188,6 +198,7 @@ export default {
       svgChart: mdiListStatus,
       imagePreviews: null,
       search: "",
+      isDrawer: null,
       isOpenDialogCreateUpdate: {
         id: null,
         open: false,
@@ -250,6 +261,7 @@ export default {
     };
 
     const v$ = useVuelidate(formDataRules, state);
+    const vuetify = getCurrentInstance().proxy.$vuetify;
 
     const titleErrors = computed(() => {
       const errors = [];
@@ -292,8 +304,17 @@ export default {
       return errors;
     });
 
+    watch(vuetify, () => {
+      if (vuetify.breakpoint.mdAndDown) {
+        state.isDrawer = true;
+      } else {
+        state.isDrawer = false;
+      }
+    });
+
     // open dialog
     const openDialogCreateEdit = async (id) => {
+      console.log(id)
       state.isOpenDialogCreateUpdate.open = true;
       state.isOpenDialogCreateUpdate.id = id;
       const ref = await doc(db, "funding", id);
@@ -336,10 +357,7 @@ export default {
       // store to firebase storage
       const storageRef = ref(storage, setFile.name);
       // upload the file and metadata
-      await uploadBytes(
-        storageRef,
-        setFile
-      );
+      await uploadBytes(storageRef, setFile);
       const url = await getDownloadURL(storageRef);
       state.formData.image = url;
     };
@@ -364,7 +382,7 @@ export default {
             description: description,
             createdAt: Timestamp.now(),
             modifiedAt: Timestamp.now(),
-          })
+          });
           state.isOpenDialogCreateUpdate.open = false;
         } catch (error) {
           console.log(error);
@@ -391,7 +409,7 @@ export default {
             target_funding: target_funding,
             currently_collected: currently_collected,
             description: description,
-            modifiedAt: Timestamp.now()
+            modifiedAt: Timestamp.now(),
           });
           state.isOpenDialogCreateUpdate.open = false;
         } catch (error) {
@@ -411,13 +429,18 @@ export default {
     };
 
     const getDataFromFirestore = async () => {
-      const q = query(collection(db, "funding"), where("createdAt", "<=", new Date()))
+      const q = query(
+        collection(db, "funding"),
+        where("createdAt", "<=", new Date())
+      );
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) =>
         state.data.push({
           ...doc.data(),
           id: doc.id,
-          currently_collected: `Rp. ${formatRupiah(doc.data().currently_collected)}`,
+          currently_collected: `Rp. ${formatRupiah(
+            doc.data().currently_collected
+          )}`,
           target_funding: `Rp. ${formatRupiah(doc.data().target_funding)}`,
         })
       );
@@ -425,6 +448,11 @@ export default {
 
     onMounted(() => {
       getDataFromFirestore();
+      if (vuetify.breakpoint.mdAndDown) {
+        state.isDrawer = true;
+      } else {
+        state.isDrawer = false;
+      }
     });
 
     return {
@@ -441,6 +469,7 @@ export default {
       targetFundingErrors,
       descErrors,
       v$,
+      vuetify
     };
   },
 };
