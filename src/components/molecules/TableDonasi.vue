@@ -154,6 +154,7 @@ export default {
         fundingId: null,
         collected: null,
         donasi: null,
+        historyDonasiUserUid: null,
       },
       headers: [
         {
@@ -221,6 +222,10 @@ export default {
               state.fundingData.fundingId = data[key];
             } else if (key === "donasi") {
               state.fundingData.donasi = parseInt(data[key]);
+            } else if (key === "historyDonasiUserUid") {
+              state.fundingData.historyDonasiUserUid = data[key];
+            } else {
+              null;
             }
           });
         });
@@ -246,9 +251,9 @@ export default {
       try {
         const { fundingId, collected, donasi } = state.fundingData;
         const { status } = state.formData;
+        const { historyDonasiUserUid } = state.fundingData;
         // update data funding
         if (status === 1) {
-          
           const refFunding = doc(db, "funding", fundingId);
           await updateDoc(refFunding, {
             currently_collected: collected + donasi,
@@ -257,6 +262,18 @@ export default {
         // update data all donasi
         const ref = doc(db, "allDonasi", state.isOpenDialogCreateUpdate.id);
         await updateDoc(ref, {
+          status: status,
+          modifiedAt: Timestamp.now(),
+        });
+        // update data historyDonasiUser
+        const historyRef = doc(
+          db,
+          "historyDonasi",
+          "udRzlQYoadZyb8KJF8PKiwLHwTJ3",
+          "historyDonasiUser",
+          historyDonasiUserUid
+        );
+        await updateDoc(historyRef, {
           status: status,
           modifiedAt: Timestamp.now(),
         });
@@ -294,7 +311,8 @@ export default {
     };
 
     const getDataFunding = async () => {
-      const ref = doc(db, "funding", state.fundingData.fundingId);
+      const { fundingId } = state.fundingData;
+      const ref = doc(db, "funding", fundingId);
       const docSnap = await getDoc(ref);
       if (docSnap.exists()) {
         const { currently_collected } = docSnap.data();
@@ -308,7 +326,6 @@ export default {
       } else {
         state.isDrawer = false;
       }
-      console.log(state.formData)
     });
 
     onMounted(() => {
