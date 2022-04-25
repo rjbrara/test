@@ -155,6 +155,7 @@ export default {
         collected: null,
         donasi: null,
         historyDonasiUserUid: null,
+        uid: null
       },
       headers: [
         {
@@ -224,8 +225,10 @@ export default {
               state.fundingData.donasi = parseInt(data[key]);
             } else if (key === "historyDonasiUserUid") {
               state.fundingData.historyDonasiUserUid = data[key];
+            } else if (key === "uid") {
+              state.fundingData.uid = data[key];
             } else {
-              null;
+              null
             }
           });
         });
@@ -251,7 +254,7 @@ export default {
       try {
         const { fundingId, collected, donasi } = state.fundingData;
         const { status } = state.formData;
-        const { historyDonasiUserUid } = state.fundingData;
+        const { historyDonasiUserUid, uid } = state.fundingData;
         // update data funding
         if (status === 1) {
           const refFunding = doc(db, "funding", fundingId);
@@ -269,7 +272,7 @@ export default {
         const historyRef = doc(
           db,
           "historyDonasi",
-          "udRzlQYoadZyb8KJF8PKiwLHwTJ3",
+          uid,
           "historyDonasiUser",
           historyDonasiUserUid
         );
