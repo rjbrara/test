@@ -5,6 +5,7 @@ import Login from '@/pages/Login'
 import Funding from '@/pages/Funding'
 import NotFound from '@/pages/404'
 import HistoryDonasi from '@/pages/HistoryDonasi'
+import Payment from '@/pages/Payment'
 import { getToken } from '@/constans'
 
 Vue.use(VueRouter)
@@ -43,6 +44,14 @@ const router = new VueRouter({
       }
     },
     {
+      path: '/payment',
+      name: 'payment',
+      component: Payment,
+      meta: {
+        isLoggedIn: true
+      }
+    },
+    {
       path: '/404',
       name: 'Not Found',
       component: NotFound
@@ -50,7 +59,7 @@ const router = new VueRouter({
     {
       path: '*',
       redirect: '/404'
-    }
+    },
   ]
 })
 

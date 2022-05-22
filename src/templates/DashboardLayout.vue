@@ -81,7 +81,7 @@
                     @change="setImagePreviews"
                   ></v-file-input>
                 </v-col>
-                <v-col cols="12" sm="12" md="12">
+                <!-- <v-col cols="12" sm="12" md="12">
                   <v-text-field
                     v-model="formData.noRek"
                     outlined
@@ -107,8 +107,8 @@
                       <v-divider></v-divider>
                     </template>
                   </v-select>
-                </v-col>
-                <v-col class="mb-5 img" cols="12" sm="12" md="12">
+                </v-col> -->
+                <!-- <v-col class="mb-5 img" cols="12" sm="12" md="12">
                   <v-img
                     :src="qrcodePreviews"
                     max-height="161"
@@ -127,7 +127,7 @@
                     label="Input image"
                     @change="setQrcode"
                   ></v-file-input>
-                </v-col>
+                </v-col> -->
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -181,19 +181,19 @@ export default {
       defaultUID: "3ngAnqg3AwKi7DTM3yeD",
       formData: {
         logo: null,
-        noRek: null,
-        payment: [],
-        qrcode: null,
+        // noRek: null,
+        // payment: [],
+        // qrcode: null,
       },
-      items: [
-        "QRIS (OVO, GOPAY, LINK AJA)",
-        "Transfer Bank Syariah Indonesia",
-        "Transfer Bank DKI Syariah",
-        "Transfer Bank BCA",
-        "Transfer Bank Mandiri",
-        "Transfer Bank Danamon",
-        "Transfer Bank Permata Bank",
-      ],
+      // items: [
+      //   "QRIS (OVO, GOPAY, LINK AJA)",
+      //   "Transfer Bank Syariah Indonesia",
+      //   "Transfer Bank DKI Syariah",
+      //   "Transfer Bank BCA",
+      //   "Transfer Bank Mandiri",
+      //   "Transfer Bank Danamon",
+      //   "Transfer Bank Permata Bank",
+      // ],
     });
 
     const vuetify = getCurrentInstance().proxy.$vuetify;
@@ -219,19 +219,19 @@ export default {
       state.formData.logo = url;
     };
 
-    const setQrcode = async (file) => {
-      if (!file) return;
-      const setFile = file[0];
-      const fimage = file ? URL.createObjectURL(setFile) : undefined;
-      // store to local state imagePrerviews
-      state.qrcodePreviews = fimage;
-      // store to firebase storage
-      const storageRef = ref(storage, setFile.name);
-      // upload the file and metadata
-      await uploadBytes(storageRef, setFile);
-      const url = await getDownloadURL(storageRef);
-      state.formData.qrcode = url;
-    };
+    // const setQrcode = async (file) => {
+    //   if (!file) return;
+    //   const setFile = file[0];
+    //   const fimage = file ? URL.createObjectURL(setFile) : undefined;
+    //   // store to local state imagePrerviews
+    //   state.qrcodePreviews = fimage;
+    //   // store to firebase storage
+    //   const storageRef = ref(storage, setFile.name);
+    //   // upload the file and metadata
+    //   await uploadBytes(storageRef, setFile);
+    //   const url = await getDownloadURL(storageRef);
+    //   state.formData.qrcode = url;
+    // };
 
     // open dialog
     const openDialog = async () => {
@@ -240,31 +240,37 @@ export default {
       const docSnap = await getDoc(ref);
       if (docSnap.exists()) {
         const data = docSnap.data();
+        console.log(data)
         Object.keys(data).forEach((key) => {
-          const formData = state.formData;
-          Object.keys(formData).forEach((key2) => {
-            if (key === key2) {
-              formData[key2] = data[key];
-            } else if (key === "logo") {
-              state.imagePreviews = data[key];
-            } else if (key === "qrcode") {
-              state.qrcodePreviews = data[key];
-            }
-          });
+          if(key === 'logo') {
+            state.imagePreviews = data[key]
+          }
+          // const formData = state.formData;
+          // Object.keys(formData).forEach((key2) => {
+          //   if (key === key2) {
+          //     formData[key2] = data[key];
+          //   } else if (key === "logo") {
+          //     state.imagePreviews = data[key];
+          //   }
+          //   else if (key === "qrcode") {
+          //     state.qrcodePreviews = data[key];
+          //   }
+          // });
         });
       }
+      console.log(state.imagePreviews)
     };
 
     const handleUpdate = async () => {
       try {
-        const { noRek, logo, payment, qrcode } = state.formData;
+        const { logo } = state.formData;
         const ref = doc(db, "lembaga", state.defaultUID);
         await updateDoc(ref, {
           logo: logo,
-          noRek: noRek,
+          // noRek: noRek,
           modifiedAt: Timestamp.now(),
-          payment: payment,
-          qrcode: qrcode,
+          // payment: payment,
+          // qrcode: qrcode,
         });
         state.isOpenDialog = false;
       } catch (error) {
@@ -299,7 +305,7 @@ export default {
       handleLogout,
       openDialog,
       setImagePreviews,
-      setQrcode,
+      // setQrcode,
       handleUpdate,
       onClose,
     };

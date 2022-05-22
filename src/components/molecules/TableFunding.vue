@@ -33,12 +33,32 @@
           </v-col>
         </v-row>
         <v-spacer></v-spacer>
-        <v-dialog v-model="isOpenDialogCreateUpdate.open" max-width="500px">
+        <v-dialog
+          persistent
+          v-model="isOpenDialogCreateUpdate.open"
+          max-width="500px"
+        >
           <template v-slot:activator="{ on, attrs }">
-            <v-btn v-if="vuetify.breakpoint.xs" color="primary" x-small max-width="100" dark class="mb-2" v-bind="attrs" v-on="on">
+            <v-btn
+              v-if="vuetify.breakpoint.xs"
+              color="primary"
+              x-small
+              max-width="100"
+              dark
+              class="mb-2"
+              v-bind="attrs"
+              v-on="on"
+            >
               Create Funding
             </v-btn>
-            <v-btn v-else color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
+            <v-btn
+              v-else
+              color="primary"
+              dark
+              class="mb-2"
+              v-bind="attrs"
+              v-on="on"
+            >
               Create Funding
             </v-btn>
           </template>
@@ -171,7 +191,7 @@ import {
   onMounted,
   reactive,
   toRefs,
-  watch
+  watch,
 } from "@vue/composition-api";
 import {
   collection,
@@ -314,7 +334,6 @@ export default {
 
     // open dialog
     const openDialogCreateEdit = async (id) => {
-      console.log(id)
       state.isOpenDialogCreateUpdate.open = true;
       state.isOpenDialogCreateUpdate.id = id;
       const ref = await doc(db, "funding", id);
@@ -341,7 +360,18 @@ export default {
 
     // close dialog
     const closeDialogCreateEdit = () => {
-      state.isOpenDialogCreateUpdate.open = false;
+      state.isOpenDialogCreateUpdate = {
+        id: null,
+        open: false
+      }
+      state.imagePreviews = null;
+      state.formData = {
+        title: "",
+        description: "",
+        image: "",
+        target_funding: 0,
+        currently_collected: 0,
+      }
     };
 
     const closeDialogDelete = () => {
@@ -469,7 +499,7 @@ export default {
       targetFundingErrors,
       descErrors,
       v$,
-      vuetify
+      vuetify,
     };
   },
 };
