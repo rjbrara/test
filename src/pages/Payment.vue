@@ -1,19 +1,19 @@
 <template>
-  <DashboardLayout title="Funding">
+  <DashboardLayout title="Payment">
     <template v-slot:child>
-      <TableFunding/>
+      <TablePayment/>
     </template>
   </DashboardLayout>
 </template>
 
 <script>
 import DashboardLayout from "@/templates/DashboardLayout.vue";
-import { TableFunding } from "@/components"
+import { TablePayment } from "@/components"
 export default {
-  name: "FundingPage",
+  name: "PaymentPage",
   components: {
     DashboardLayout,
-    TableFunding
+    TablePayment
   },
 };
 </script>
