@@ -35,7 +35,7 @@
           </v-layout>
         </router-link>
       </v-list-item>
-       <v-list-item class="px-10">
+      <v-list-item class="px-10">
         <router-link to="/history-donasi" class="link">
           <v-layout row align-center justify-center>
             <v-list-item-icon>
@@ -71,13 +71,32 @@
           </v-layout>
         </router-link>
       </v-list-item>
+      <v-list-item class="px-10">
+        <router-link to="/about" class="link">
+          <v-layout row align-center justify-center>
+            <v-list-item-icon>
+              <v-icon>{{ svgInfo }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <h4>About Me</h4>
+            </v-list-item-content>
+          </v-layout>
+        </router-link>
+      </v-list-item>
     </v-list-item-group>
   </v-list>
 </template>
 
 <script>
 import { reactive, toRefs } from "@vue/composition-api";
-import { mdiViewDashboard, mdiFolder, mdiArchive, mdiCreditCardOutline, mdiAccount } from "@mdi/js";
+import {
+  mdiViewDashboard,
+  mdiFolder,
+  mdiArchive,
+  mdiCreditCardOutline,
+  mdiAccount,
+  mdiInformationOutline,
+} from "@mdi/js";
 export default {
   name: "ListItem",
   setup() {
@@ -86,7 +105,8 @@ export default {
       svgFolder: mdiFolder,
       svgHistory: mdiArchive,
       svgPayment: mdiCreditCardOutline,
-      svgAccount: mdiAccount
+      svgAccount: mdiAccount,
+      svgInfo: mdiInformationOutline,
     });
     return { ...toRefs(state) };
   },
@@ -95,6 +115,6 @@ export default {
 
 <style scoped>
 .link {
-    text-decoration: none;
+  text-decoration: none;
 }
 </style>

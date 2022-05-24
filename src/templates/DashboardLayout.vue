@@ -31,7 +31,7 @@
     <v-sheet
       id="scrolling-techniques-6"
       class="pa-12 grey lighten-3 px-1"
-      height="100vh"
+      min-height="100vh"
     >
       <v-container class="mr-4 pa-8">
         <!-- if width < 960 -->
