@@ -24,7 +24,7 @@
               <v-icon color="white" size="35px">{{ svgChart }}</v-icon>
             </v-card>
           </v-col>
-          <v-col cols="12" xs="12" sm="12" md="12" lg="8" class="mt-5">
+          <v-col cols="12" xs="12" sm="12" md="12" lg="8" class="mt-5 ml-2">
             <v-text-field
               v-model="search"
               label="Search..."
@@ -61,6 +61,16 @@
             >
               Create Funding
             </v-btn>
+            <download-excel
+              :data="data"
+              :fields="json_fields"
+              worksheet="My Worksheet"
+              :name="setNameExcel()"
+            >
+              <v-btn max-width="150" dark class="mb-2 mr-2" color="success">
+                Export Excel
+              </v-btn>
+            </download-excel>
           </template>
           <v-card>
             <v-card-title>
@@ -123,6 +133,12 @@
                       @input="v$.formData.description.$touch()"
                       @blur="v$.formData.description.$touch()"
                     ></v-textarea>
+                  </v-col>
+                  <v-col col="12" sm="12" md="12">
+                    <v-switch
+                      v-model="formData.isActive"
+                      label="isActive"
+                    ></v-switch>
                   </v-col>
                 </v-row>
               </v-container>
@@ -233,6 +249,7 @@ export default {
         image: "",
         target_funding: 0,
         currently_collected: 0,
+        isActive: false,
       },
       headers: [
         {
@@ -260,6 +277,11 @@ export default {
         },
       ],
       data: [],
+      json_fields: {
+        "Title Funding": "title",
+        "Collected Donations": "currently_collected",
+        "Donation Target Amount": "target_funding",
+      },
     });
 
     const formDataRules = {
@@ -362,8 +384,8 @@ export default {
     const closeDialogCreateEdit = () => {
       state.isOpenDialogCreateUpdate = {
         id: null,
-        open: false
-      }
+        open: false,
+      };
       state.imagePreviews = null;
       state.formData = {
         title: "",
@@ -371,7 +393,8 @@ export default {
         image: "",
         target_funding: 0,
         currently_collected: 0,
-      }
+        isActive: false,
+      };
     };
 
     const closeDialogDelete = () => {
@@ -401,6 +424,7 @@ export default {
           currently_collected,
           description,
           target_funding,
+          isActive,
         } = state.formData;
         try {
           // store data
@@ -410,6 +434,7 @@ export default {
             target_funding: target_funding,
             currently_collected: currently_collected,
             description: description,
+            isActive: isActive,
             createdAt: Timestamp.now(),
             modifiedAt: Timestamp.now(),
           });
@@ -430,6 +455,7 @@ export default {
             currently_collected,
             description,
             target_funding,
+            isActive,
           } = state.formData;
 
           const ref = doc(db, "funding", state.isOpenDialogCreateUpdate.id);
@@ -439,6 +465,7 @@ export default {
             target_funding: target_funding,
             currently_collected: currently_collected,
             description: description,
+            isActive: isActive,
             modifiedAt: Timestamp.now(),
           });
           state.isOpenDialogCreateUpdate.open = false;
@@ -476,6 +503,10 @@ export default {
       );
     };
 
+    const setNameExcel = () => {
+      return `${Date.now()}-funding.xls`;
+    };
+
     onMounted(() => {
       getDataFromFirestore();
       if (vuetify.breakpoint.mdAndDown) {
@@ -498,6 +529,7 @@ export default {
       titleErrors,
       targetFundingErrors,
       descErrors,
+      setNameExcel,
       v$,
       vuetify,
     };

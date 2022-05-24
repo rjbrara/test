@@ -2,6 +2,6 @@ import ListItem from "./ListItem";
 import TableFunding from "./TableFunding";
 import TableDonasi from "./TableDonasi";
 import TablePayment from "./TablePayment";
-import TableUser from "./TableUser";
+import TableUsers from "./TableUsers";
 
-export { ListItem, TableFunding, TableDonasi, TableUser, TablePayment };
+export { ListItem, TableFunding, TableDonasi, TableUsers, TablePayment };
