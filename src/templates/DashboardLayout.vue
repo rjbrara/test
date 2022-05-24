@@ -74,60 +74,39 @@
                   <v-file-input
                     small-chips
                     outlined
-                    multiple
                     prepend-icon=""
                     accept="image/png, image/jpeg, image/bmp"
                     label="Input image"
                     @change="setImagePreviews"
                   ></v-file-input>
                 </v-col>
-                <!-- <v-col cols="12" sm="12" md="12">
-                  <v-text-field
-                    v-model="formData.noRek"
-                    outlined
-                    label="No Rekening"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="12" md="12">
-                  <v-select
-                    v-model="formData.payment"
-                    :items="items"
-                    label="Select Item"
-                    multiple
-                    chips
-                    outlined
-                    :menu-props="{
-                      closeOnContentClick: isSelectClose,
-                    }"
-                  >
-                    <template v-slot:prepend-item>
-                      <v-list-item-action class="iconClose">
-                        <v-icon @click="onClose">{{ svgClose }}</v-icon>
-                      </v-list-item-action>
-                      <v-divider></v-divider>
-                    </template>
-                  </v-select>
-                </v-col> -->
-                <!-- <v-col class="mb-5 img" cols="12" sm="12" md="12">
+                <v-col class="mb-5 img" cols="12" sm="12" md="12">
                   <v-img
-                    :src="qrcodePreviews"
+                    :src="bannerPreviews"
                     max-height="161"
                     max-width="280"
-                    alt="qrcode preview"
-                    v-if="qrcodePreviews"
+                    class="img"
+                    alt="banner preview"
+                    v-if="bannerPreviews"
                   ></v-img>
                 </v-col>
                 <v-col cols="12" sm="12" md="12">
                   <v-file-input
                     small-chips
-                    multiple
                     outlined
                     prepend-icon=""
                     accept="image/png, image/jpeg, image/bmp"
-                    label="Input image"
-                    @change="setQrcode"
+                    label="Input Banner"
+                    @change="setBannerImage"
                   ></v-file-input>
-                </v-col> -->
+                </v-col>
+                <v-col cols="12" sm="12" md="12">
+                  <v-text-field
+                    v-model="formData.phone"
+                    outlined
+                    label="No Whatsapp"
+                  ></v-text-field>
+                </v-col>
               </v-row>
             </v-container>
             <v-divider></v-divider>
@@ -177,13 +156,12 @@ export default {
       isOpenDialog: false,
       isSelectClose: false,
       imagePreviews: null,
-      qrcodePreviews: null,
+      bannerPreviews: null,
       defaultUID: "3ngAnqg3AwKi7DTM3yeD",
       formData: {
         logo: null,
-        // noRek: null,
-        // payment: [],
-        // qrcode: null,
+        phone: null,
+        banner: null,
       },
       // items: [
       //   "QRIS (OVO, GOPAY, LINK AJA)",
@@ -219,19 +197,19 @@ export default {
       state.formData.logo = url;
     };
 
-    // const setQrcode = async (file) => {
-    //   if (!file) return;
-    //   const setFile = file[0];
-    //   const fimage = file ? URL.createObjectURL(setFile) : undefined;
-    //   // store to local state imagePrerviews
-    //   state.qrcodePreviews = fimage;
-    //   // store to firebase storage
-    //   const storageRef = ref(storage, setFile.name);
-    //   // upload the file and metadata
-    //   await uploadBytes(storageRef, setFile);
-    //   const url = await getDownloadURL(storageRef);
-    //   state.formData.qrcode = url;
-    // };
+    const setBannerImage = async (file) => {
+      if (!file) return;
+      const setFile = file[0];
+      const fimage = file ? URL.createObjectURL(setFile) : undefined;
+      // store to local state imagePrerviews
+      state.bannerPreviews = fimage;
+      // store to firebase storage
+      const storageRef = ref(storage, setFile.name);
+      // upload the file and metadata
+      await uploadBytes(storageRef, setFile);
+      const url = await getDownloadURL(storageRef);
+      state.formData.banner = url;
+    };
 
     // open dialog
     const openDialog = async () => {
@@ -240,37 +218,29 @@ export default {
       const docSnap = await getDoc(ref);
       if (docSnap.exists()) {
         const data = docSnap.data();
-        console.log(data)
         Object.keys(data).forEach((key) => {
-          if(key === 'logo') {
-            state.imagePreviews = data[key]
+          if (key === "logo") {
+            state.imagePreviews = data[key];
+            state.formData.logo = data[key];
+          } else if (key === "banner") {
+            state.bannerPreviews = data[key];
+            state.formData.banner = data[key];
+          } else if (key === "phone") {
+            state.formData.phone = data[key];
           }
-          // const formData = state.formData;
-          // Object.keys(formData).forEach((key2) => {
-          //   if (key === key2) {
-          //     formData[key2] = data[key];
-          //   } else if (key === "logo") {
-          //     state.imagePreviews = data[key];
-          //   }
-          //   else if (key === "qrcode") {
-          //     state.qrcodePreviews = data[key];
-          //   }
-          // });
         });
       }
-      console.log(state.imagePreviews)
     };
 
     const handleUpdate = async () => {
       try {
-        const { logo } = state.formData;
+        const { logo, phone, banner } = state.formData;
         const ref = doc(db, "lembaga", state.defaultUID);
         await updateDoc(ref, {
           logo: logo,
-          // noRek: noRek,
+          phone: phone,
           modifiedAt: Timestamp.now(),
-          // payment: payment,
-          // qrcode: qrcode,
+          banner: banner,
         });
         state.isOpenDialog = false;
       } catch (error) {
@@ -305,7 +275,7 @@ export default {
       handleLogout,
       openDialog,
       setImagePreviews,
-      // setQrcode,
+      setBannerImage,
       handleUpdate,
       onClose,
     };
