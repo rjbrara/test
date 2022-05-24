@@ -59,13 +59,25 @@
           </v-layout>
         </router-link>
       </v-list-item>
+      <v-list-item class="px-10">
+        <router-link to="/users" class="link">
+          <v-layout row align-center justify-center>
+            <v-list-item-icon>
+              <v-icon>{{ svgAccount }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <h4>Users</h4>
+            </v-list-item-content>
+          </v-layout>
+        </router-link>
+      </v-list-item>
     </v-list-item-group>
   </v-list>
 </template>
 
 <script>
 import { reactive, toRefs } from "@vue/composition-api";
-import { mdiViewDashboard, mdiFolder, mdiArchive, mdiCreditCardOutline } from "@mdi/js";
+import { mdiViewDashboard, mdiFolder, mdiArchive, mdiCreditCardOutline, mdiAccount } from "@mdi/js";
 export default {
   name: "ListItem",
   setup() {
@@ -73,7 +85,8 @@ export default {
       svgDashboard: mdiViewDashboard,
       svgFolder: mdiFolder,
       svgHistory: mdiArchive,
-      svgPayment: mdiCreditCardOutline
+      svgPayment: mdiCreditCardOutline,
+      svgAccount: mdiAccount
     });
     return { ...toRefs(state) };
   },

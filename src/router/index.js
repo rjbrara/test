@@ -6,6 +6,7 @@ import Funding from '@/pages/Funding'
 import NotFound from '@/pages/404'
 import HistoryDonasi from '@/pages/HistoryDonasi'
 import Payment from '@/pages/Payment'
+import Users from '@/pages/Users'
 import { getToken } from '@/constans'
 
 Vue.use(VueRouter)
@@ -47,6 +48,14 @@ const router = new VueRouter({
       path: '/payment',
       name: 'payment',
       component: Payment,
+      meta: {
+        isLoggedIn: true
+      }
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: Users,
       meta: {
         isLoggedIn: true
       }
