@@ -33,7 +33,21 @@
           </v-col>
         </v-row>
         <v-spacer></v-spacer>
-        <v-dialog v-model="isOpenDialogCreateUpdate.open" max-width="500px">
+        <download-excel
+          :data="data"
+          :fields="json_fields"
+          worksheet="My Worksheet"
+          :name="namingExcel('history-donasi')"
+        >
+          <v-btn max-width="150" dark class="mb-2 mr-2" color="success">
+            Export Excel
+          </v-btn>
+        </download-excel>
+        <v-dialog
+          persistent
+          v-model="isOpenDialogCreateUpdate.open"
+          max-width="500px"
+        >
           <v-card>
             <v-card-title>
               <span class="text-h5" v-if="isOpenDialogCreateUpdate.id"
@@ -130,6 +144,8 @@ import {
 import { db } from "@/firebase";
 import formatRupiah from "@/utils/currency";
 import convertStatusText from "@/utils/status";
+import convertSecondToDate from "@/utils/date";
+import namingExcel from "@/utils/excel";
 
 export default {
   name: "TableComponent",
@@ -155,7 +171,7 @@ export default {
         collected: null,
         donasi: null,
         historyDonasiUserUid: null,
-        uid: null
+        uid: null,
       },
       headers: [
         {
@@ -189,6 +205,13 @@ export default {
           value: "status",
         },
         {
+          text: "Date",
+          align: "start",
+          sortable: false,
+          value: "date",
+          width: 120,
+        },
+        {
           text: "Actions",
           sortable: false,
           value: "actions",
@@ -199,6 +222,14 @@ export default {
         { name: "Pending", value: 0 },
         { name: "Success", value: 1 },
       ],
+      json_fields: {
+        Name: "name",
+        Email: "email",
+        "Title Donasi": "title",
+        Donasi: "donasi",
+        Status: "status",
+        Date: "date",
+      },
     });
 
     const vuetify = getCurrentInstance().proxy.$vuetify;
@@ -228,7 +259,7 @@ export default {
             } else if (key === "uid") {
               state.fundingData.uid = data[key];
             } else {
-              null
+              null;
             }
           });
         });
@@ -280,9 +311,13 @@ export default {
           status: status,
           modifiedAt: Timestamp.now(),
         });
-
         state.isOpenDialogCreateUpdate.open = false;
+        if (!window.alert("Success Update History")) {
+          window.location.reload();
+        }
+        window.location.reload();
       } catch (error) {
+        window.alert("Error Update History");
         console.log(error);
       }
     };
@@ -292,7 +327,11 @@ export default {
         const ref = doc(db, "allDonasi", state.isOpenDialogDelete.id);
         await deleteDoc(ref);
         state.isOpenDialogDelete.open = false;
+        if (!window.alert("Success Delete History")) {
+          window.location.reload();
+        }
       } catch (error) {
+        window.alert("Error Delete History");
         console.log(error);
       }
     };
@@ -309,6 +348,7 @@ export default {
           id: doc.id,
           donasi: `Rp. ${formatRupiah(doc.data().donasi)}`,
           status: convertStatusText(doc.data().status),
+          date: convertSecondToDate(doc.data().createdAt.seconds),
         });
       });
     };
@@ -348,6 +388,7 @@ export default {
       closeDialogDelete,
       handleUpdate,
       handleDelete,
+      namingExcel,
     };
   },
 };

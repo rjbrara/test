@@ -53,7 +53,7 @@ export default {
       defaultUID: "3ngAnqg3AwKi7DTM3yeD",
       customToolbar: [
         ["bold", "italic", "underline", "strike"], // toggled buttons
-        ["blockquote", "code-block", "link"],
+        ["blockquote", "code-block", "link", "image"],
 
         [{ header: 1 }, { header: 2 }], // custom button values
         [{ list: "ordered" }, { list: "bullet" }],
@@ -71,6 +71,7 @@ export default {
     });
 
     const onSubmit = async () => {
+      // console.log(state.syaratKetentuan);
       try {
         const { syaratKetentuan, about, defaultUID } = state;
         const ref = doc(db, "lembaga", defaultUID);
@@ -78,10 +79,12 @@ export default {
           about: about,
           syaratKetentuan: syaratKetentuan,
         });
-        window.alert("Success Update About")
+        if (!window.alert("Success Update About")) {
+          window.location.reload();
+        }
       } catch (error) {
         console.log(error);
-        window.alert("Error Update About")
+        window.alert("Error Update About");
       }
     };
 
@@ -100,6 +103,12 @@ export default {
       }
     };
 
+    // const handleImageAdded = (file, Editor, cursorLocation, resetUploader) => {
+    //   console.table([file, Editor, cursorLocation, resetUploader]);
+    //   // Editor.insertEmbed(cursorLocation, "image", url);
+    //   // resetUploader();
+    // };
+
     onMounted(() => {
       getDataFromFirestore();
     });
@@ -107,6 +116,7 @@ export default {
     return {
       ...toRefs(state),
       onSubmit,
+      // handleImageAdded,
     };
   },
 };
