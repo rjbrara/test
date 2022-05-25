@@ -123,13 +123,14 @@ export default {
       // querySnapshot.forEach((doc) => {
       //   state.data.push(doc.data());
       // });
+      const superAdminUid = "hWKIxge4iyPRLQDgFlisypRBzrx2"
       fetch("https://server-crowdfunding.vercel.app/api/users", {
         method: "GET",
       })
         .then((res) => res.json())
         .then((result) => {
-          result.data.forEach((doc) => {
-            state.data.push(doc);
+          result.data.filter((doc) => doc.uid !== superAdminUid).map(user => {
+            state.data.push(user);
           });
         })
         .catch((err) => console.log(err));
