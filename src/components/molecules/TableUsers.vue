@@ -69,7 +69,7 @@ import {
   reactive,
   toRefs,
 } from "@vue/composition-api";
-import { collection, getDocs, doc, deleteDoc } from "@firebase/firestore";
+import { doc, deleteDoc } from "@firebase/firestore";
 import { db } from "@/firebase";
 
 export default {
@@ -118,47 +118,46 @@ export default {
     };
 
     const getDataFromFirestore = async () => {
-      const ref = await collection(db, "users");
-      const querySnapshot = await getDocs(ref);
-      querySnapshot.forEach((doc) => {
-        state.data.push(doc.data());
-      });
+      // const ref = await collection(db, "users");
+      // const querySnapshot = await getDocs(ref);
+      // querySnapshot.forEach((doc) => {
+      //   state.data.push(doc.data());
+      // });
+      fetch("https://server-crowdfunding.vercel.app/api/users", {
+        method: "GET",
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          result.data.forEach((doc) => {
+            state.data.push(doc);
+          });
+        })
+        .catch((err) => console.log(err));
     };
 
     const handleDelete = async () => {
-      try {
-        const { data, isOpenDialogDelete } = state;
-        // delete user auth
-        fetch(
-          `https://server-crowdfunding.vercel.app/api/delete-user/${state.isOpenDialogDelete.id}`,
-          {
-            method: "DELETE",
+      const { isOpenDialogDelete } = state;
+      // delete user firestore
+      const ref = doc(db, "users", isOpenDialogDelete.id);
+      deleteDoc(ref);
+      // delete user auth
+      fetch(
+        `https://server-crowdfunding.vercel.app/api/delete-user/${state.isOpenDialogDelete.id}`,
+        {
+          method: "DELETE",
+        }
+      )
+        .then((res) => res.json())
+        .then(() => {
+          isOpenDialogDelete.open = false;
+          if (!window.alert("Success Delete User")) {
+            window.location.reload();
           }
-        )
-          .then((res) => res.json())
-          .then((res) => {
-            if (res.status === 200) {
-              const newData = data
-                .filter((item) => item.id !== isOpenDialogDelete.id)
-                .map((item) => item);
-              state.data = newData;
-              // delete user firestore
-              const ref = doc(db, "users", isOpenDialogDelete.id);
-              deleteDoc(ref);
-              window.alert(res.message);
-              isOpenDialogDelete.open = false;
-            } else {
-              window.alert(res.message);
-              isOpenDialogDelete.open = false;
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            window.alert("Error Delete User");
-          });
-      } catch (error) {
-        console.log(error);
-      }
+        })
+        .catch((err) => {
+          console.log(err);
+          window.alert("Error Delete User");
+        });
     };
 
     onMounted(() => {
