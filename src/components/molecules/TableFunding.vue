@@ -65,7 +65,7 @@
               :data="data"
               :fields="json_fields"
               worksheet="My Worksheet"
-              :name="setNameExcel()"
+              :name="namingExcel('funding')"
             >
               <v-btn max-width="150" dark class="mb-2 mr-2" color="success">
                 Export Excel
@@ -94,7 +94,6 @@
                   <v-col cols="12" sm="12" md="12">
                     <v-file-input
                       small-chips
-                      multiple
                       outlined
                       prepend-icon=""
                       accept="image/png, image/jpeg, image/bmp"
@@ -226,6 +225,7 @@ import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { required, minLength, maxLength, numeric } from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
 import formatRupiah from "@/utils/currency";
+import namingExcel from "@/utils/excel";
 
 export default {
   name: "TableComponent",
@@ -403,14 +403,13 @@ export default {
 
     const setImagePreviews = async (file) => {
       if (!file) return;
-      const setFile = file[0];
-      const fimage = file ? URL.createObjectURL(setFile) : undefined;
+      const fimage = file ? URL.createObjectURL(file) : undefined;
       // store to local state imagePrerviews
       state.imagePreviews = fimage;
       // store to firebase storage
-      const storageRef = ref(storage, setFile.name);
+      const storageRef = ref(storage, file.name);
       // upload the file and metadata
-      await uploadBytes(storageRef, setFile);
+      await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       state.formData.image = url;
     };
@@ -439,6 +438,9 @@ export default {
             modifiedAt: Timestamp.now(),
           });
           state.isOpenDialogCreateUpdate.open = false;
+          if (!window.alert("Success Create Funding")) {
+            window.location.reload();
+          }
         } catch (error) {
           console.log(error);
         }
@@ -469,6 +471,9 @@ export default {
             modifiedAt: Timestamp.now(),
           });
           state.isOpenDialogCreateUpdate.open = false;
+          if (!window.alert("Success Update Funding")) {
+            window.location.reload();
+          }
         } catch (error) {
           console.log(error);
         }
@@ -480,6 +485,9 @@ export default {
         const ref = doc(db, "funding", state.isOpenDialogDelete.id);
         await deleteDoc(ref);
         state.isOpenDialogDelete.open = false;
+        if (!window.alert("Success Delete Funding")) {
+          window.location.reload();
+        }
       } catch (error) {
         console.log(error);
       }
@@ -501,10 +509,6 @@ export default {
           target_funding: `Rp. ${formatRupiah(doc.data().target_funding)}`,
         })
       );
-    };
-
-    const setNameExcel = () => {
-      return `${Date.now()}-funding.xls`;
     };
 
     onMounted(() => {
@@ -529,7 +533,7 @@ export default {
       titleErrors,
       targetFundingErrors,
       descErrors,
-      setNameExcel,
+      namingExcel,
       v$,
       vuetify,
     };

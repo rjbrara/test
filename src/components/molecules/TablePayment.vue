@@ -300,6 +300,7 @@ export default {
           payment: data,
         });
         state.isOpenDialogCreateUpdate.open = false;
+        window.alert("Success Create Payment");
       } catch (error) {
         console.log(error);
       }
@@ -316,7 +317,9 @@ export default {
         await updateDoc(ref, {
           payment: data,
         });
-        window.location.reload();
+        if (!window.alert("Success Update Payment")) {
+          window.location.reload();
+        }
       } catch (error) {
         console.log(error);
       }
@@ -334,6 +337,7 @@ export default {
           payment: newData,
         });
         isOpenDialogDelete.open = false;
+        window.alert("Success Delete Payment");
       } catch (error) {
         console.log(error);
       }

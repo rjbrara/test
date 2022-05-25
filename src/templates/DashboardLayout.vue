@@ -137,7 +137,7 @@ import { auth, db } from "@/firebase";
 import router from "@/router";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { storage } from "@/firebase";
-import { doc, getDoc, updateDoc, Timestamp } from "@firebase/firestore";
+import { doc, getDoc, Timestamp, updateDoc } from "@firebase/firestore";
 
 export default {
   name: "DashboardLayout",
@@ -185,28 +185,26 @@ export default {
 
     const setImagePreviews = async (file) => {
       if (!file) return;
-      const setFile = file[0];
-      const fimage = file ? URL.createObjectURL(setFile) : undefined;
+      const fimage = file ? URL.createObjectURL(file) : undefined;
       // store to local state imagePrerviews
       state.imagePreviews = fimage;
       // store to firebase storage
-      const storageRef = ref(storage, setFile.name);
+      const storageRef = ref(storage, file.name);
       // upload the file and metadata
-      await uploadBytes(storageRef, setFile);
+      await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       state.formData.logo = url;
     };
 
     const setBannerImage = async (file) => {
       if (!file) return;
-      const setFile = file[0];
-      const fimage = file ? URL.createObjectURL(setFile) : undefined;
+      const fimage = file ? URL.createObjectURL(file) : undefined;
       // store to local state imagePrerviews
       state.bannerPreviews = fimage;
       // store to firebase storage
-      const storageRef = ref(storage, setFile.name);
+      const storageRef = ref(storage, file.name);
       // upload the file and metadata
-      await uploadBytes(storageRef, setFile);
+      await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
       state.formData.banner = url;
     };
@@ -243,6 +241,9 @@ export default {
           banner: banner,
         });
         state.isOpenDialog = false;
+        if (!window.alert("Success Update Lembaga")) {
+          window.location.reload();
+        }
       } catch (error) {
         console.log(error);
       }
