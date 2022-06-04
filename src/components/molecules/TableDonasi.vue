@@ -110,10 +110,10 @@
       </v-toolbar>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-      <v-icon small class="mr-2" @click="openDialogCreateEdit(item.id)">
+      <v-icon small class="mr-2" @click="openDialogCreateEdit(item.historyDonasiUserUid)">
         mdi-pencil
       </v-icon>
-      <v-icon small @click="openDialogDelete(item.id)"> mdi-delete </v-icon>
+      <v-icon small @click="openDialogDelete(item)"> mdi-delete </v-icon>
     </template>
     <template v-slot:no-data>
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -161,6 +161,7 @@ export default {
       },
       isOpenDialogDelete: {
         id: null,
+        uid: null,
         open: false,
       },
       formData: {
@@ -267,9 +268,11 @@ export default {
       getDataFunding();
     };
 
-    const openDialogDelete = (id) => {
+    const openDialogDelete = (data) => {
+      const { uid, historyDonasiUserUid } = data;
       state.isOpenDialogDelete.open = true;
-      state.isOpenDialogDelete.id = id;
+      state.isOpenDialogDelete.id = historyDonasiUserUid;
+      state.isOpenDialogDelete.uid = uid;
     };
 
     // close dialog
@@ -324,9 +327,18 @@ export default {
 
     const handleDelete = async () => {
       try {
-        const ref = doc(db, "allDonasi", state.isOpenDialogDelete.id);
+        const { isOpenDialogDelete } = state;
+        const ref = doc(db, "allDonasi", isOpenDialogDelete.id);
+        const historyRef = doc(
+          db,
+          "historyDonasi",
+          isOpenDialogDelete.uid,
+          "historyDonasiUser",
+          isOpenDialogDelete.id
+        );
         await deleteDoc(ref);
-        state.isOpenDialogDelete.open = false;
+        await deleteDoc(historyRef);
+        isOpenDialogDelete.open = false;
         if (!window.alert("Success Delete History")) {
           window.location.reload();
         }
@@ -345,7 +357,7 @@ export default {
       querySnapshot.forEach((doc) => {
         state.data.push({
           ...doc.data(),
-          id: doc.id,
+          // id: doc.id,
           donasi: `Rp. ${formatRupiah(doc.data().donasi)}`,
           status: convertStatusText(doc.data().status),
           date: convertSecondToDate(doc.data().createdAt.seconds),
