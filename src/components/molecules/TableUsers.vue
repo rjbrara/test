@@ -6,6 +6,11 @@
     :items-per-page="5"
     :search="search"
   >
+    <template v-slot:[`item.isVerified`]="{ item }">
+      <v-chip class="ma-2" text-color="#FFFFFF" :color="getColor(item.isVerified)">
+        {{ getName(item.isVerified) }}
+      </v-chip>
+    </template>
     <template v-slot:top>
       <v-toolbar flat>
         <v-row
@@ -97,6 +102,12 @@ export default {
           value: "email",
         },
         {
+          text: "Email Verified",
+          align: "start",
+          sortable: false,
+          value: "isVerified",
+        },
+        {
           text: "Actions",
           sortable: false,
           value: "actions",
@@ -123,15 +134,17 @@ export default {
       // querySnapshot.forEach((doc) => {
       //   state.data.push(doc.data());
       // });
-      const superAdminUid = "hWKIxge4iyPRLQDgFlisypRBzrx2"
+      const superAdminUid = "hWKIxge4iyPRLQDgFlisypRBzrx2";
       fetch("https://server-crowdfunding.vercel.app/api/users", {
         method: "GET",
       })
         .then((res) => res.json())
         .then((result) => {
-          result.data.filter((doc) => doc.uid !== superAdminUid).map(user => {
-            state.data.push(user);
-          });
+          result.data
+            .filter((doc) => doc.uid !== superAdminUid)
+            .map((user) => {
+              state.data.push(user);
+            });
         })
         .catch((err) => console.log(err));
     };
@@ -161,6 +174,14 @@ export default {
         });
     };
 
+    const getColor = (data) => {
+      return `${data ? "primary" : "red"}`
+    }
+
+    const getName = (data) => {
+      return `${data ? "Sudah Verified" : "Belum Verified"}`
+    }
+
     onMounted(() => {
       getDataFromFirestore();
       if (vuetify.breakpoint.mdAndDown) {
@@ -175,6 +196,8 @@ export default {
       openDialogDelete,
       closeDialogDelete,
       handleDelete,
+      getColor,
+      getName,
       vuetify,
     };
   },
