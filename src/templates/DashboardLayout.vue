@@ -55,7 +55,7 @@
         <v-dialog v-model="isOpenDialog" width="700">
           <v-card>
             <v-card-title class="text-h5 grey lighten-2">
-              Lembaga
+              Pengaturan
             </v-card-title>
 
             <v-container>
