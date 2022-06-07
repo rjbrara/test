@@ -65,9 +65,9 @@
           <v-card>
             <v-card-title>
               <span class="text-h5" v-if="isOpenDialogCreateUpdate.id"
-                >Update New Data</span
+                >Update Data Payment</span
               >
-              <span class="text-h5" v-else>Create New Data</span>
+              <span class="text-h5" v-else>Create New Data Payment</span>
             </v-card-title>
             <v-container>
               <v-row no-gutters>
@@ -96,6 +96,9 @@
                     v-model="formData.name"
                     outlined
                     label="Payment Name"
+                    :error-messages="namePaymentErrors"
+                    @input="v$.formData.name.$touch()"
+                    @blur="v$.formData.name.$touch()"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="12" md="12">
@@ -103,6 +106,9 @@
                     v-model="formData.noRek"
                     outlined
                     label="No Rekening"
+                    :error-messages="noRekErrors"
+                    @input="v$.formData.noRek.$touch()"
+                    @blur="v$.formData.noRek.$touch()"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -169,6 +175,7 @@ import {
   onMounted,
   reactive,
   toRefs,
+  computed,
   //   watch,
 } from "@vue/composition-api";
 import { doc, getDoc, updateDoc } from "@firebase/firestore";
@@ -176,6 +183,8 @@ import { db } from "@/firebase";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { storage } from "@/firebase";
 import generateUID from "@/utils/uid";
+import useVuelidate from "@vuelidate/core";
+import { required, minLength, numeric } from "@vuelidate/validators";
 
 export default {
   name: "TablePayment",
@@ -222,7 +231,48 @@ export default {
       },
     });
 
+    const paymentRules = {
+      formData: {
+        name: {
+          required,
+          minLength: minLength(5),
+        },
+        noRek: {
+          minLength: minLength(10),
+          numeric,
+        },
+      },
+    };
+
     const vuetify = getCurrentInstance().proxy.$vuetify;
+    const v$ = useVuelidate(paymentRules, state);
+
+    // set errors fields
+    const namePaymentErrors = computed(() => {
+      const errors = [];
+      v$?.value?.$errors.filter((err) => {
+        if (
+          (err?.$validator === "required" || err?.$validator === "minLength") &&
+          err?.$property === "name"
+        ) {
+          errors.push(err?.$message);
+        }
+      });
+      return errors;
+    });
+
+    const noRekErrors = computed(() => {
+      const errors = [];
+      v$?.value?.$errors.filter((err) => {
+        if (
+          (err?.$validator === "numeric" || err?.$validator === "minLength") &&
+          err?.$property === "noRek"
+        ) {
+          errors.push(err?.$message);
+        }
+      });
+      return errors;
+    });
 
     const setQrcode = async (file) => {
       if (!file) return;
@@ -292,36 +342,42 @@ export default {
     };
 
     const handleCreate = async () => {
-      try {
-        const { data, formData, defaultUID } = state;
-        data.push(formData);
-        const ref = doc(db, "lembaga", defaultUID);
-        await updateDoc(ref, {
-          payment: data,
-        });
-        state.isOpenDialogCreateUpdate.open = false;
-        window.alert("Success Create Payment");
-      } catch (error) {
-        console.log(error);
+      v$.value.$touch();
+      if (!v$?.value?.$invalid) {
+        try {
+          const { data, formData, defaultUID } = state;
+          data.push(formData);
+          const ref = doc(db, "lembaga", defaultUID);
+          await updateDoc(ref, {
+            payment: data,
+          });
+          state.isOpenDialogCreateUpdate.open = false;
+          window.alert("Success Create Payment");
+        } catch (error) {
+          console.log(error);
+        }
       }
     };
 
     const handleUpdate = async () => {
-      try {
-        const { data, isOpenDialogCreateUpdate, defaultUID } = state;
-        const newData = data.findIndex(
-          (payment) => payment.id === isOpenDialogCreateUpdate.id
-        );
-        data[newData] = state.formData;
-        const ref = doc(db, "lembaga", defaultUID);
-        await updateDoc(ref, {
-          payment: data,
-        });
-        if (!window.alert("Success Update Payment")) {
-          window.location.reload();
+      v$.value.$touch();
+      if (!v$?.value?.$invalid) {
+        try {
+          const { data, isOpenDialogCreateUpdate, defaultUID } = state;
+          const newData = data.findIndex(
+            (payment) => payment.id === isOpenDialogCreateUpdate.id
+          );
+          data[newData] = state.formData;
+          const ref = doc(db, "lembaga", defaultUID);
+          await updateDoc(ref, {
+            payment: data,
+          });
+          if (!window.alert("Success Update Payment")) {
+            window.location.reload();
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
       }
     };
 
@@ -363,6 +419,9 @@ export default {
       handleDelete,
       setQrcode,
       vuetify,
+      v$,
+      namePaymentErrors,
+      noRekErrors,
     };
   },
 };

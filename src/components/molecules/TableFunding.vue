@@ -75,9 +75,9 @@
           <v-card>
             <v-card-title>
               <span class="text-h5" v-if="isOpenDialogCreateUpdate.id"
-                >Update New Data</span
+                >Update Data Funding</span
               >
-              <span class="text-h5" v-else>Create New Data</span>
+              <span class="text-h5" v-else>Create New Data Funding</span>
             </v-card-title>
 
             <v-card-text>
@@ -415,6 +415,7 @@ export default {
     };
 
     const handleSubmit = async () => {
+      v$.value.$touch();
       if (!v$?.value?.$invalid) {
         // destructuring array
         const {
@@ -448,6 +449,7 @@ export default {
     };
 
     const handleUpdate = async () => {
+      v$.value.$touch();
       if (!v$?.value?.$invalid) {
         try {
           // update data

@@ -51,7 +51,7 @@
           <v-card>
             <v-card-title>
               <span class="text-h5" v-if="isOpenDialogCreateUpdate.id"
-                >Update New Data</span
+                >Update New Status Pembayaran</span
               >
               <span class="text-h5" v-else>Create New Data</span>
             </v-card-title>

@@ -102,6 +102,7 @@ export default {
     const v$ = useVuelidate(localRules, state);
 
     const handleSubmit = async () => {
+      v$.value.$touch();
       if (!v$.value.$invalid) {
         try {
           await signInWithEmailAndPassword(auth, state.email, state.password)
