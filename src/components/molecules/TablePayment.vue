@@ -87,7 +87,7 @@
                     outlined
                     prepend-icon=""
                     accept="image/png, image/jpeg, image/bmp"
-                    label="Input Qrcode"
+                    label="Upload Qrcode"
                     @change="setQrcode"
                   ></v-file-input>
                 </v-col>
@@ -207,13 +207,11 @@ export default {
         {
           text: "Name",
           align: "start",
-          sortable: false,
           value: "name",
         },
         {
           text: "No Rekening",
           align: "start",
-          sortable: false,
           value: "noRek",
         },
         {

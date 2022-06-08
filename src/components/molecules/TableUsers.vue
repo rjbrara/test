@@ -92,19 +92,16 @@ export default {
         {
           text: "Name",
           align: "start",
-          sortable: false,
           value: "name",
         },
         {
           text: "Email",
           align: "start",
-          sortable: false,
           value: "email",
         },
         {
           text: "Email Verified",
           align: "start",
-          sortable: false,
           value: "isVerified",
         },
         {

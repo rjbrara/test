@@ -6,6 +6,16 @@
     :items-per-page="5"
     :search="search"
   >
+    <template v-slot:[`item.status`]="{ item }">
+      <v-chip
+        class="ma-2"
+        text-color="#FFFFFF"
+        :color="getColor(item.status)"
+      >
+        {{ item.status }}
+      </v-chip>
+    </template>
+
     <template v-slot:top>
       <v-toolbar flat>
         <v-row
@@ -110,7 +120,11 @@
       </v-toolbar>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-      <v-icon small class="mr-2" @click="openDialogCreateEdit(item.historyDonasiUserUid)">
+      <v-icon
+        small
+        class="mr-2"
+        @click="openDialogCreateEdit(item.historyDonasiUserUid)"
+      >
         mdi-pencil
       </v-icon>
       <v-icon small @click="openDialogDelete(item)"> mdi-delete </v-icon>
@@ -178,37 +192,42 @@ export default {
         {
           text: "Name",
           align: "start",
-          sortable: false,
           value: "name",
+          width: 150,
         },
         {
           text: "Email",
           align: "start",
-          sortable: false,
           value: "email",
+          width: 150,
         },
         {
           text: "Title Donasi",
           align: "start",
-          sortable: false,
           value: "title",
+          width: 150,
         },
         {
           text: "Donasi",
           align: "start",
-          sortable: false,
           value: "donasi",
+          width: 150,
+        },
+        {
+          text: "Payment",
+          align: "start",
+          value: "payment",
+          width: 150,
         },
         {
           text: "Status",
           align: "start",
-          sortable: false,
           value: "status",
+          width: 150,
         },
         {
           text: "Date",
           align: "start",
-          sortable: false,
           value: "date",
           width: 120,
         },
@@ -375,6 +394,10 @@ export default {
       }
     };
 
+    const getColor = (data) => {
+      return `${data === "Success" ? "success" : "primary"}`;
+    };
+
     watch(vuetify, () => {
       if (vuetify.breakpoint.mdAndDown) {
         state.isDrawer = true;
@@ -401,6 +424,7 @@ export default {
       handleUpdate,
       handleDelete,
       namingExcel,
+      getColor,
     };
   },
 };

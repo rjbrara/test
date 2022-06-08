@@ -6,6 +6,15 @@
     :items-per-page="5"
     :search="search"
   >
+    <template v-slot:[`item.isActive`]="{ item }">
+      <v-chip
+        class="ma-2"
+        text-color="#FFFFFF"
+        :color="getColor(item.isActive)"
+      >
+        {{ getName(item.isActive) }}
+      </v-chip>
+    </template>
     <template v-slot:top>
       <v-toolbar flat>
         <v-row
@@ -255,20 +264,24 @@ export default {
         {
           text: "Title Funding",
           align: "start",
-          sortable: false,
           value: "title",
         },
         {
           text: "Collected Donations",
           align: "start",
-          sortable: false,
+          width: 200,
           value: "currently_collected",
         },
         {
           text: "Donation Target Amount",
           align: "start",
-          sortable: false,
+          width: 200,
           value: "target_funding",
+        },
+        {
+          text: "Active",
+          align: "start",
+          value: "isActive",
         },
         {
           text: "Actions",
@@ -513,6 +526,14 @@ export default {
       );
     };
 
+    const getColor = (data) => {
+      return `${data ? "primary" : "red"}`;
+    };
+
+    const getName = (data) => {
+      return `${data ? "Active" : "Inactive"}`;
+    };
+
     onMounted(() => {
       getDataFromFirestore();
       if (vuetify.breakpoint.mdAndDown) {
@@ -536,6 +557,8 @@ export default {
       targetFundingErrors,
       descErrors,
       namingExcel,
+      getName,
+      getColor,
       v$,
       vuetify,
     };
