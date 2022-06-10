@@ -55,7 +55,7 @@
         <v-dialog v-model="isOpenDialog" width="700">
           <v-card>
             <v-card-title class="text-h5 grey lighten-2">
-              Lembaga
+              Pengaturan
             </v-card-title>
 
             <v-container>
@@ -105,6 +105,9 @@
                     v-model="formData.phone"
                     outlined
                     label="No Whatsapp"
+                    :error-messages="phoneErrors"
+                    @input="v$.formData.phone.$touch()"
+                    @blur="v$.formData.phone.$touch()"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -128,6 +131,7 @@ import {
   reactive,
   onMounted,
   toRefs,
+  computed
 } from "@vue/composition-api";
 import { mdiExitToApp, mdiWrench, mdiClose } from "@mdi/js";
 import { ListItem } from "@/components";
@@ -138,6 +142,8 @@ import router from "@/router";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { storage } from "@/firebase";
 import { doc, getDoc, Timestamp, updateDoc } from "@firebase/firestore";
+import useVuelidate from "@vuelidate/core";
+import { numeric } from "@vuelidate/validators";
 
 export default {
   name: "DashboardLayout",
@@ -174,7 +180,27 @@ export default {
       // ],
     });
 
+    const settingRules = {
+      formData: {
+        phone: {
+          numeric,
+        },
+      },
+    };
+
     const vuetify = getCurrentInstance().proxy.$vuetify;
+    const v$ = useVuelidate(settingRules, state);
+
+    // set errors fields
+    const phoneErrors = computed(() => {
+      const errors = [];
+      v$?.value?.$errors.filter((err) => {
+        if (err?.$validator === "numeric" && err?.$property === "phone") {
+          errors.push(err?.$message);
+        }
+      });
+      return errors;
+    });
 
     const handleLogout = () => {
       signOut(auth).then(() => {
@@ -231,21 +257,24 @@ export default {
     };
 
     const handleUpdate = async () => {
-      try {
-        const { logo, phone, banner } = state.formData;
-        const ref = doc(db, "lembaga", state.defaultUID);
-        await updateDoc(ref, {
-          logo: logo,
-          phone: phone,
-          modifiedAt: Timestamp.now(),
-          banner: banner,
-        });
-        state.isOpenDialog = false;
-        if (!window.alert("Success Update Lembaga")) {
-          window.location.reload();
+      v$.value.$touch();
+      if (!v$?.value?.$invalid) {
+        try {
+          const { logo, phone, banner } = state.formData;
+          const ref = doc(db, "lembaga", state.defaultUID);
+          await updateDoc(ref, {
+            logo: logo,
+            phone: phone,
+            modifiedAt: Timestamp.now(),
+            banner: banner,
+          });
+          state.isOpenDialog = false;
+          if (!window.alert("Success Update Lembaga")) {
+            window.location.reload();
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
       }
     };
 
@@ -279,6 +308,8 @@ export default {
       setBannerImage,
       handleUpdate,
       onClose,
+      phoneErrors,
+      v$,
     };
   },
 };

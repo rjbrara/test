@@ -1,5 +1,5 @@
 <template>
-  <DashboardLayout title="History Donasi">
+  <DashboardLayout title="History Donation">
     <template v-slot:child>
       <TableDonasi />
     </template>

@@ -42,7 +42,7 @@
               <v-icon>{{ svgHistory }}</v-icon>
             </v-list-item-icon>
             <v-list-item-content>
-              <h4>History Donasi</h4>
+              <h4>History Donation</h4>
             </v-list-item-content>
           </v-layout>
         </router-link>

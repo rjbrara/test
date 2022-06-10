@@ -6,6 +6,16 @@
     :items-per-page="5"
     :search="search"
   >
+    <template v-slot:[`item.status`]="{ item }">
+      <v-chip
+        class="ma-2"
+        text-color="#FFFFFF"
+        :color="getColor(item.status)"
+      >
+        {{ item.status }}
+      </v-chip>
+    </template>
+
     <template v-slot:top>
       <v-toolbar flat>
         <v-row
@@ -51,7 +61,7 @@
           <v-card>
             <v-card-title>
               <span class="text-h5" v-if="isOpenDialogCreateUpdate.id"
-                >Update New Data</span
+                >Update New Status Pembayaran</span
               >
               <span class="text-h5" v-else>Create New Data</span>
             </v-card-title>
@@ -110,10 +120,14 @@
       </v-toolbar>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-      <v-icon small class="mr-2" @click="openDialogCreateEdit(item.id)">
+      <v-icon
+        small
+        class="mr-2"
+        @click="openDialogCreateEdit(item.historyDonasiUserUid)"
+      >
         mdi-pencil
       </v-icon>
-      <v-icon small @click="openDialogDelete(item.id)"> mdi-delete </v-icon>
+      <v-icon small @click="openDialogDelete(item)"> mdi-delete </v-icon>
     </template>
     <template v-slot:no-data>
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -161,6 +175,7 @@ export default {
       },
       isOpenDialogDelete: {
         id: null,
+        uid: null,
         open: false,
       },
       formData: {
@@ -177,37 +192,42 @@ export default {
         {
           text: "Name",
           align: "start",
-          sortable: false,
           value: "name",
+          width: 150,
         },
         {
           text: "Email",
           align: "start",
-          sortable: false,
           value: "email",
+          width: 150,
         },
         {
           text: "Title Donasi",
           align: "start",
-          sortable: false,
           value: "title",
+          width: 150,
         },
         {
           text: "Donasi",
           align: "start",
-          sortable: false,
           value: "donasi",
+          width: 150,
+        },
+        {
+          text: "Payment",
+          align: "start",
+          value: "payment",
+          width: 150,
         },
         {
           text: "Status",
           align: "start",
-          sortable: false,
           value: "status",
+          width: 150,
         },
         {
           text: "Date",
           align: "start",
-          sortable: false,
           value: "date",
           width: 120,
         },
@@ -267,9 +287,11 @@ export default {
       getDataFunding();
     };
 
-    const openDialogDelete = (id) => {
+    const openDialogDelete = (data) => {
+      const { uid, historyDonasiUserUid } = data;
       state.isOpenDialogDelete.open = true;
-      state.isOpenDialogDelete.id = id;
+      state.isOpenDialogDelete.id = historyDonasiUserUid;
+      state.isOpenDialogDelete.uid = uid;
     };
 
     // close dialog
@@ -324,9 +346,18 @@ export default {
 
     const handleDelete = async () => {
       try {
-        const ref = doc(db, "allDonasi", state.isOpenDialogDelete.id);
+        const { isOpenDialogDelete } = state;
+        const ref = doc(db, "allDonasi", isOpenDialogDelete.id);
+        const historyRef = doc(
+          db,
+          "historyDonasi",
+          isOpenDialogDelete.uid,
+          "historyDonasiUser",
+          isOpenDialogDelete.id
+        );
         await deleteDoc(ref);
-        state.isOpenDialogDelete.open = false;
+        await deleteDoc(historyRef);
+        isOpenDialogDelete.open = false;
         if (!window.alert("Success Delete History")) {
           window.location.reload();
         }
@@ -345,7 +376,7 @@ export default {
       querySnapshot.forEach((doc) => {
         state.data.push({
           ...doc.data(),
-          id: doc.id,
+          // id: doc.id,
           donasi: `Rp. ${formatRupiah(doc.data().donasi)}`,
           status: convertStatusText(doc.data().status),
           date: convertSecondToDate(doc.data().createdAt.seconds),
@@ -361,6 +392,10 @@ export default {
         const { currently_collected } = docSnap.data();
         state.fundingData.collected = currently_collected; //store data currently_collected
       }
+    };
+
+    const getColor = (data) => {
+      return `${data === "Success" ? "success" : "primary"}`;
     };
 
     watch(vuetify, () => {
@@ -389,6 +424,7 @@ export default {
       handleUpdate,
       handleDelete,
       namingExcel,
+      getColor,
     };
   },
 };

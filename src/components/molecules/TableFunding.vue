@@ -6,6 +6,15 @@
     :items-per-page="5"
     :search="search"
   >
+    <template v-slot:[`item.isActive`]="{ item }">
+      <v-chip
+        class="ma-2"
+        text-color="#FFFFFF"
+        :color="getColor(item.isActive)"
+      >
+        {{ getName(item.isActive) }}
+      </v-chip>
+    </template>
     <template v-slot:top>
       <v-toolbar flat>
         <v-row
@@ -75,9 +84,9 @@
           <v-card>
             <v-card-title>
               <span class="text-h5" v-if="isOpenDialogCreateUpdate.id"
-                >Update New Data</span
+                >Update Data Funding</span
               >
-              <span class="text-h5" v-else>Create New Data</span>
+              <span class="text-h5" v-else>Create New Data Funding</span>
             </v-card-title>
 
             <v-card-text>
@@ -255,20 +264,24 @@ export default {
         {
           text: "Title Funding",
           align: "start",
-          sortable: false,
           value: "title",
         },
         {
           text: "Collected Donations",
           align: "start",
-          sortable: false,
+          width: 200,
           value: "currently_collected",
         },
         {
           text: "Donation Target Amount",
           align: "start",
-          sortable: false,
+          width: 200,
           value: "target_funding",
+        },
+        {
+          text: "Active",
+          align: "start",
+          value: "isActive",
         },
         {
           text: "Actions",
@@ -415,6 +428,7 @@ export default {
     };
 
     const handleSubmit = async () => {
+      v$.value.$touch();
       if (!v$?.value?.$invalid) {
         // destructuring array
         const {
@@ -448,6 +462,7 @@ export default {
     };
 
     const handleUpdate = async () => {
+      v$.value.$touch();
       if (!v$?.value?.$invalid) {
         try {
           // update data
@@ -511,6 +526,14 @@ export default {
       );
     };
 
+    const getColor = (data) => {
+      return `${data ? "primary" : "red"}`;
+    };
+
+    const getName = (data) => {
+      return `${data ? "Active" : "Inactive"}`;
+    };
+
     onMounted(() => {
       getDataFromFirestore();
       if (vuetify.breakpoint.mdAndDown) {
@@ -534,6 +557,8 @@ export default {
       targetFundingErrors,
       descErrors,
       namingExcel,
+      getName,
+      getColor,
       v$,
       vuetify,
     };
