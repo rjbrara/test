@@ -72,6 +72,18 @@
         </router-link>
       </v-list-item>
       <v-list-item class="px-10">
+        <router-link to="/articles" class="link">
+          <v-layout row align-center justify-center>
+            <v-list-item-icon>
+              <v-icon>{{ svgBook }}</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <h4>Articles</h4>
+            </v-list-item-content>
+          </v-layout>
+        </router-link>
+      </v-list-item>
+      <v-list-item class="px-10">
         <router-link to="/about" class="link">
           <v-layout row align-center justify-center>
             <v-list-item-icon>
@@ -96,6 +108,7 @@ import {
   mdiCreditCardOutline,
   mdiAccount,
   mdiInformationOutline,
+  mdiBook
 } from "@mdi/js";
 export default {
   name: "ListItem",
@@ -107,6 +120,7 @@ export default {
       svgPayment: mdiCreditCardOutline,
       svgAccount: mdiAccount,
       svgInfo: mdiInformationOutline,
+      svgBook: mdiBook
     });
     return { ...toRefs(state) };
   },
