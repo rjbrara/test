@@ -258,7 +258,7 @@ export default {
       },
       headers: [
         {
-          text: "Title Funding",
+          text: "Title Article",
           align: "start",
           value: "title",
         },
