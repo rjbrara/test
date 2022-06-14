@@ -293,7 +293,7 @@ export default {
         title: {
           required,
           minLength: minLength(5),
-          maxLength: maxLength(50),
+          maxLength: maxLength(60),
         },
         recipient_funds: {
           required,
