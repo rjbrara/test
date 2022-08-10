@@ -232,6 +232,12 @@ export default {
           width: 120,
         },
         {
+          text: "Phone",
+          align: "start",
+          value: "phone",
+          width: 120,
+        },
+        {
           text: "Actions",
           sortable: false,
           value: "actions",
